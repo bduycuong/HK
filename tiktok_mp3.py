@@ -27,16 +27,19 @@ PILLAR_DEFINITIONS = {
     - Mục tiêu: Thu hút người xem, viral.
     - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
+    - Lồng ghép được HuyK vào trong nội dung mẹo/tin tức.
     """,
     "A2: Kiến thức - Chuyên gia": """
     - Mục tiêu: Thể hiện sự hiểu biết, chuyên gia.
     - Nội dung: Lịch sử thương hiệu, thuật ngữ chuyên ngành, phân biệt chất liệu, dạy nghề.
     - Phong cách: Trầm ổn, sâu sắc, giải thích dễ hiểu, uy tín.
+    - Lồng ghép được HuyK vào trong nội dung kiến thức.
     """,
     "A3: Uy tín - Niềm tin": """
     - Mục tiêu: Xây dựng lòng tin.
     - Nội dung: Hoạt động cửa hàng, giải thưởng, giao hàng, kể chuyện bảo hành, tâm sự nghề.
     - Phong cách: Chân thành, kể chuyện (storytelling), tự hào.
+    - Lồng ghép được HuyK vào trong nội dung uy tín.
     """,
     "A4: Chuyển đổi - Kể chuyện khách hàng": """
     - Mục tiêu: Bán hàng khéo léo (Soft Sell), chạm vào cảm xúc người xem. TUYỆT ĐỐI KHÔNG kêu gọi mua hàng thô thiển, KHÔNG báo giá trực tiếp.
@@ -94,17 +97,16 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. CONFIG & FUNCTIONS (Đã thêm Memory) ---
+# --- 6. CONFIG & FUNCTIONS ---
 CONFIG_FILE = "app_config.txt"
 DEFAULT_PROMPT = """Nhiệm vụ: Viết lại nội dung video TikTok theo phong cách HuyK."""
 
 def load_config():
-    # Thêm trường 'memory' để lưu quy tắc riêng
     config = {
         "gemini_key": "", "minimax_key": "", "minimax_group": "", 
         "minimax_voice": "", "minimax_model": "speech-2.6-hd", 
         "prompt": DEFAULT_PROMPT,
-        "memory": "" # Bộ nhớ quy tắc riêng
+        "memory": ""
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -139,8 +141,7 @@ def open_settings():
     
     st.divider()
     st.markdown("🧠 **Bộ nhớ Agent (Quy tắc riêng)**")
-    st.caption("Nhập các quy tắc bạn muốn AI LUÔN LUÔN ghi nhớ (Ví dụ: Không dùng icon, xưng hô cụ thể, cấm từ ngữ cấm...)")
-    new_memory = st.text_area("Quy tắc ghi nhớ", value=config.get("memory", ""), height=100, placeholder="Ví dụ: Không bao giờ báo giá trực tiếp. Luôn kết bài bằng 'Chúc an lành'.")
+    new_memory = st.text_area("Quy tắc ghi nhớ", value=config.get("memory", ""), height=100, placeholder="Ví dụ: Không bao giờ báo giá trực tiếp...")
 
     with st.expander("📝 Prompt Gốc (Nâng cao)"):
         new_prompt = st.text_area("Base Prompt", value=config["prompt"], height=100)
@@ -180,31 +181,23 @@ def rewrite_with_gemini(original_text, pillar, product_info=""):
     if not config["gemini_key"]: return "⚠️ Vui lòng nhập API Key trong cài đặt."
     
     pillar_instruction = PILLAR_DEFINITIONS.get(pillar, "")
-    
-    # INJECT MEMORY VÀO PROMPT
     memory_instruction = ""
     if config.get("memory"):
-        memory_instruction = f"""
-    --- 🧠 BỘ NHỚ QUY TẮC RIÊNG (BẮT BUỘC TUÂN THỦ) ---
-    {config['memory']}
-    ----------------------------------------------------
-    """
+        memory_instruction = f"\n--- 🧠 BỘ NHỚ QUY TẮC RIÊNG ---\n{config['memory']}\n------------------------------\n"
 
     system_instruction = f"""
     {config["prompt"]}
-    
     {memory_instruction}
-    
     --- YÊU CẦU CỤ THỂ CHO BÀI NÀY ---
     1. TUYẾN NỘI DUNG: {pillar}
     {pillar_instruction}
-    
     2. SẢN PHẨM CẦN LỒNG GHÉP (Nếu có):
     {product_info if product_info else "Không có sản phẩm cụ thể, tập trung vào nội dung chính."}
-    
-    3. QUY TẮC VIẾT CƠ BẢN:
+    3. QUY TẮC VIẾT:
+    - Không cần mở đầu bằng xin chào
+    - Nếu là tuyến A4: Tuyệt đối KHÔNG báo giá trực tiếp, KHÔNG kêu gọi "mua ngay". Hãy tập trung vào CÂU CHUYỆN KHÁCH HÀNG.
     - Giọng văn: Chân thật, trầm, tâm sự (style HuyK).
-    - Xưng hô: "HuyK", gọi khách là "anh chị".
+    - Xưng hô: "HuyK", gọi khách là "anh, chị, bạn, mọi người, anh khách, chị khách".
     - Độ dài: Phù hợp kịch bản video ngắn (khoảng 40s - 90s).
     """
 
@@ -289,15 +282,12 @@ with col_strategy:
                 df = pd.read_csv(uploaded_products)
             else:
                 df = pd.read_excel(uploaded_products)
-            
             df.columns = [c.strip().lower() for c in df.columns]
             col_code = next((c for c in df.columns if 'mã' in c or 'code' in c), df.columns[0])
             col_name = next((c for c in df.columns if 'tên' in c or 'name' in c), df.columns[1])
             col_desc = next((c for c in df.columns if 'mô tả' in c or 'desc' in c), df.columns[-1])
-            
             st.session_state.product_df = df[[col_code, col_name, col_desc]].copy()
             st.success(f"✅ Đã tải {len(df)} sản phẩm")
-            
             st.session_state.product_df['display'] = st.session_state.product_df[col_code].astype(str) + " - " + st.session_state.product_df[col_name].astype(str)
             product_options = st.session_state.product_df['display'].tolist()
         except Exception as e:
@@ -361,6 +351,8 @@ with col_main:
                             raw = transcribe_audio("temp.mp3", load_whisper_model())
                             st.write(f"💎 Đang viết theo tuyến: {selected_pillar}...")
                             rewrite = rewrite_with_gemini(raw, selected_pillar, selected_product_info_str)
+                            # COPY FILE ĐỂ DÙNG Ở TRANG KẾT QUẢ
+                            shutil.copy("temp.mp3", "downloaded_audio.mp3") 
                             st.session_state.data.update({"videoTitle": uploaded_file.name, "originalTranscript": raw, "rewrittenScript": rewrite, "generatedAudio": None})
                             st.session_state.processing_done = True
                             st.rerun()
@@ -391,11 +383,25 @@ with col_main:
             st.rerun()
         c_title.markdown(f"### 🎯 Kết quả xử lý")
         st.divider()
+        
+        # --- HIỂN THỊ FILE GỐC ---
+        if os.path.exists("downloaded_audio.mp3"):
+            st.markdown("**🔊 Audio/Video Gốc:**")
+            st.audio("downloaded_audio.mp3", format="audio/mp3")
+        # -------------------------
+        
         with st.expander("📄 Xem nội dung gốc (Transcript)", expanded=False):
             st.text_area("Original", value=st.session_state.data["originalTranscript"], height=200)
+        
         st.markdown(f"**✨ Kịch bản HuyK ({selected_pillar})**")
         new_script = st.text_area("Editor", value=st.session_state.data["rewrittenScript"], height=400, label_visibility="collapsed")
         if new_script != st.session_state.data["rewrittenScript"]: st.session_state.data["rewrittenScript"] = new_script
+        
+        # --- HIỂN THỊ SỐ KÝ TỰ ---
+        char_count = len(st.session_state.data["rewrittenScript"])
+        st.caption(f"📝 Số ký tự: {char_count} | ⏳ Ước tính audio: ~{int(char_count/15)} giây")
+        # -------------------------
+
         st.markdown('<div class="card" style="margin-top:20px; background:#f8fafc">', unsafe_allow_html=True)
         if not st.session_state.data["generatedAudio"]:
             if st.button("🎙️ Tạo giọng đọc AI", type="primary", use_container_width=True):
