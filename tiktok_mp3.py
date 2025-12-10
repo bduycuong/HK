@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # --- 2. CẤU HÌNH LOGO ---
-LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png"
+LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
 
 # ==========================================
 # 🔐 HỆ THỐNG ĐĂNG NHẬP
@@ -28,14 +28,13 @@ def check_login():
     if st.session_state.get('logged_in', False):
         return True
 
-    # CSS riêng cho màn hình Login (Force Light Mode)
+    # CSS riêng cho màn hình Login
     st.markdown(f"""
         <style>
             .stApp {{ background-color: #f8fafc !important; }}
             .login-container {{ text-align: center; margin-top: 50px; }}
             .login-logo {{ width: 80px; border-radius: 10px; margin-bottom: 10px; }}
             h2, p {{ color: #0f172a !important; }}
-            /* Fix ô nhập liệu login */
             .stTextInput input {{ background-color: white !important; color: #333 !important; border: 1px solid #e2e8f0 !important; }}
         </style>
         <div class="login-container">
@@ -73,7 +72,7 @@ if not check_login():
 
 # --- 3. ĐỊNH NGHĨA TUYẾN NỘI DUNG ---
 PILLAR_DEFINITIONS = {
-    "A1: Traffic - Mẹo & Tin tức": """
+   "A1: Traffic - Mẹo & Tin tức": """
     - Mục tiêu: Thu hút người xem, viral.
     - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
@@ -117,123 +116,67 @@ if 'data' not in st.session_state:
         "rewrittenScript": "", "generatedAudio": None
     }
 
-# --- 5. CSS GIAO DIỆN (FORCE LIGHT MODE TOÀN DIỆN) ---
+# --- 5. CSS GIAO DIỆN (LIGHT MODE FIXED) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    /* 1. ÉP NỀN TRẮNG CHO TOÀN APP */
     * {{ font-family: 'Inter', sans-serif; }}
     .stApp {{ background-color: #f8fafc !important; color: #0f172a !important; }}
     
-    /* 2. ÉP MÀU CHỮ & NỀN CHO CÁC Ô INPUT (Fix lỗi Dark Mode) */
-    .stTextInput input, 
-    .stTextArea textarea, 
-    .stSelectbox div[data-baseweb="select"], 
-    .stMultiSelect div[data-baseweb="select"] {{
+    /* INPUTS & TEXT */
+    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"], .stMultiSelect div[data-baseweb="select"] {{
         background-color: #ffffff !important;
         color: #0f172a !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
     }}
+    ul[data-testid="stSelectboxVirtualDropdown"] {{ background-color: white !important; }}
+    li[role="option"] {{ color: #0f172a !important; }}
     
-    /* 2.1 Fix Dropdown Menu (Khi bấm vào Selectbox) */
-    ul[data-testid="stSelectboxVirtualDropdown"] {{
-        background-color: white !important;
-    }}
-    li[role="option"] {{
-        color: #0f172a !important;
-    }}
-
-    /* 3. FIX KHUNG UPLOAD FILE (Fix lỗi nền đen thui) */
+    /* UPLOAD BOX */
     div[data-testid="stFileUploader"] {{
         background-color: #ffffff !important;
         border: 1px dashed #cbd5e1 !important;
         border-radius: 16px !important;
         padding: 20px !important;
     }}
-    div[data-testid="stFileUploader"] section {{
-        background-color: #f8fafc !important;
-    }}
-    div[data-testid="stFileUploader"] span, 
-    div[data-testid="stFileUploader"] small, 
-    div[data-testid="stFileUploader"] label {{
-        color: #64748b !important;
-    }}
-    div[data-testid="stFileUploader"] button {{
-        background-color: white !important;
-        color: #0f172a !important;
-        border: 1px solid #e2e8f0 !important;
-    }}
+    div[data-testid="stFileUploader"] section {{ background-color: #f8fafc !important; }}
+    div[data-testid="stFileUploader"] span, div[data-testid="stFileUploader"] small, div[data-testid="stFileUploader"] label {{ color: #64748b !important; }}
+    div[data-testid="stFileUploader"] button {{ background-color: white !important; color: #0f172a !important; border: 1px solid #e2e8f0 !important; }}
 
-    /* 4. CHỈNH LẠI MÀU CHỮ CƠ BẢN */
-    h1, h2, h3, p, label, span, div {{
-        color: #0f172a !important;
-    }}
-    
-    /* Ngoại lệ: Chữ trong nút bấm màu xanh thì phải trắng */
-    .stButton > button p {{
-        color: white !important;
-    }}
+    h1, h2, h3, p, label, span, div {{ color: #0f172a !important; }}
+    .stButton > button p {{ color: white !important; }}
 
     header, footer {{ display: none !important; }}
     .block-container {{ padding-top: 1rem !important; max-width: 1400px !important; }}
 
-    /* 5. NAVBAR RESPONSIVE */
+    /* NAVBAR */
     .nav-container {{
-        background: white; 
-        border-bottom: 1px solid #e2e8f0;
-        padding: 0.8rem 1.5rem; 
-        margin-bottom: 1.5rem;
-        border-radius: 16px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center;
-        flex-wrap: wrap; 
-        gap: 10px;
+        background: white; border-bottom: 1px solid #e2e8f0;
+        padding: 0.8rem 1.5rem; margin-bottom: 1.5rem;
+        border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
     }}
     .logo-section {{ display: flex; align-items: center; gap: 12px; }}
     .logo-img {{ width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }}
     .brand-text {{ font-size: 18px; font-weight: 700; color: #0f172a !important; }}
-    
     .status-group {{ display: flex; gap: 12px; align-items: center; }}
     
-    /* 6. BUTTON STYLE */
+    /* BUTTON */
     .stButton > button {{
-        background-color: #2563eb !important; 
-        color: white !important; 
-        border-radius: 12px; 
-        height: 40px; 
-        font-weight: 600;
-        width: 100%; 
-        border: none;
-        transition: all 0.2s;
+        background-color: #2563eb !important; color: white !important;
+        border-radius: 12px; height: 40px; font-weight: 600; width: 100%; border: none; transition: all 0.2s;
     }}
     .stButton > button:hover {{ background-color: #1d4ed8 !important; transform: translateY(-1px); }}
 
-    /* 7. CARDS */
-    .card {{ 
-        background: white; 
-        border-radius: 20px; 
-        border: 1px solid #e2e8f0; 
-        padding: 20px; 
-        box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.03); 
-        height: 100%; 
-    }}
+    /* CARDS */
+    .card {{ background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.03); height: 100%; }}
     
-    /* 8. MOBILE OPTIMIZATION */
+    /* MOBILE */
     @media (max-width: 640px) {{
-        .nav-container {{
-            padding: 0.8rem;
-            flex-direction: column;
-            align-items: flex-start;
-        }}
-        .status-group {{
-            width: 100%;
-            justify-content: space-between;
-            margin-top: 5px;
-        }}
+        .nav-container {{ padding: 0.8rem; flex-direction: column; align-items: flex-start; }}
+        .status-group {{ width: 100%; justify-content: space-between; margin-top: 5px; }}
         .brand-text {{ font-size: 16px; }}
         .block-container {{ padding-left: 1rem !important; padding-right: 1rem !important; }}
     }}
@@ -276,15 +219,23 @@ def open_settings():
         idx = model_options.index(current) if current in model_options else 0
         model_input = st.selectbox("Model", model_options, index=idx)
     with c2: voice_input = st.text_input("Voice ID", value=st.session_state.user_voice_id)
+    
     st.divider()
     st.markdown("🧠 **Bộ nhớ Agent**")
     memory_input = st.text_area("Quy tắc ghi nhớ", value=st.session_state.user_memory, height=100)
+    
+    # [ĐÃ THÊM LẠI] - Phần Prompt gốc
+    with st.expander("📝 Prompt Gốc (Nâng cao)"):
+        prompt_input = st.text_area("Base Prompt", value=config["prompt"], height=150, help="Prompt mặc định của hệ thống")
+
     if st.button("Lưu cấu hình", type="primary"):
         st.session_state.user_gemini_key = gemini_input
         st.session_state.user_minimax_key = minimax_input
         st.session_state.user_voice_id = voice_input
         st.session_state.user_memory = memory_input
-        save_config(voice_input, model_input, config["prompt"], memory_input)
+        
+        # Lưu cả Prompt vào file config
+        save_config(voice_input, model_input, prompt_input, memory_input)
         st.success("✅ Đã cập nhật!"); time.sleep(1); st.rerun()
 
 def download_media(url):
@@ -517,5 +468,3 @@ with col_r:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
-
