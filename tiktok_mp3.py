@@ -2,7 +2,7 @@ import streamlit as st
 import yt_dlp
 import os
 import google.generativeai as genai
-import requests
+import requestse
 import time
 import shutil
 import json
@@ -259,7 +259,7 @@ st.markdown(f"""
 col_strategy, col_main = st.columns([3, 7], gap="large")
 
 with col_strategy:
-    st.subheader("🛠️ Chiến lược Content")
+    st.subheader("🔁Chiến lược Content")
     st.markdown("**1. Tuyến nội dung**")
     selected_pillar = st.selectbox(
         "Hướng triển khai:",
@@ -421,5 +421,6 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
