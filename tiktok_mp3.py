@@ -10,7 +10,7 @@ import whisper
 import pandas as pd
 
 # --- 1. CẤU HÌNH TRANG & ICON ---
-TAB_ICON_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
+TAB_ICON_URL = "https://i.ibb.co/5grLnPjW/logohk.png"" 
 st.set_page_config(
     page_title="HuyK AI Studio", 
     page_icon=TAB_ICON_URL,
@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # --- 2. CẤU HÌNH LOGO ---
-LOGO_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
+LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png"" 
 
 # ==========================================
 # 🔐 HỆ THỐNG ĐĂNG NHẬP
@@ -28,18 +28,20 @@ def check_login():
     if st.session_state.get('logged_in', False):
         return True
 
-    # CSS riêng cho màn hình Login
+    # CSS riêng cho màn hình Login (Force Light Mode)
     st.markdown(f"""
         <style>
+            .stApp {{ background-color: #f8fafc !important; }}
             .login-container {{ text-align: center; margin-top: 50px; }}
             .login-logo {{ width: 80px; border-radius: 10px; margin-bottom: 10px; }}
-            /* Fix lỗi Dark Mode cho màn login */
-            .stTextInput input {{ background-color: white !important; color: #333 !important; }}
+            h2, p {{ color: #0f172a !important; }}
+            /* Fix ô nhập liệu login */
+            .stTextInput input {{ background-color: white !important; color: #333 !important; border: 1px solid #e2e8f0 !important; }}
         </style>
         <div class="login-container">
             <img src="{LOGO_URL}" class="login-logo">
-            <h2 style="color:#333;">HuyK AI Studio</h2>
-            <p style="color:#666;">Vui lòng đăng nhập để sử dụng hệ thống</p>
+            <h2 style="font-family:'Inter',sans-serif;">HuyK AI Studio</h2>
+            <p>Vui lòng đăng nhập để sử dụng hệ thống</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -75,16 +77,19 @@ PILLAR_DEFINITIONS = {
     - Mục tiêu: Thu hút người xem, viral.
     - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
+    - Lồng ghép được HuyK vào trong nội dung mẹo/tin tức.
     """,
     "A2: Kiến thức - Chuyên gia": """
     - Mục tiêu: Thể hiện sự hiểu biết, chuyên gia.
     - Nội dung: Lịch sử thương hiệu, thuật ngữ chuyên ngành, phân biệt chất liệu, dạy nghề.
     - Phong cách: Trầm ổn, sâu sắc, giải thích dễ hiểu, uy tín.
+    - Lồng ghép được HuyK vào trong nội dung kiến thức.
     """,
     "A3: Uy tín - Niềm tin": """
     - Mục tiêu: Xây dựng lòng tin.
     - Nội dung: Hoạt động cửa hàng, giải thưởng, giao hàng, kể chuyện bảo hành, tâm sự nghề.
     - Phong cách: Chân thành, kể chuyện (storytelling), tự hào.
+    - Lồng ghép được HuyK vào trong nội dung uy tín.
     """,
     "A4: Chuyển đổi - Kể chuyện khách hàng": """
     - Mục tiêu: Bán hàng khéo léo (Soft Sell), chạm vào cảm xúc người xem. TUYỆT ĐỐI KHÔNG kêu gọi mua hàng thô thiển, KHÔNG báo giá trực tiếp.
@@ -112,34 +117,69 @@ if 'data' not in st.session_state:
         "rewrittenScript": "", "generatedAudio": None
     }
 
-# --- 5. CSS GIAO DIỆN (ĐÃ TỐI ƯU MOBILE & DARK MODE) ---
+# --- 5. CSS GIAO DIỆN (FORCE LIGHT MODE TOÀN DIỆN) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    /* 1. FORCE LIGHT MODE & FONT */
+    /* 1. ÉP NỀN TRẮNG CHO TOÀN APP */
     * {{ font-family: 'Inter', sans-serif; }}
+    .stApp {{ background-color: #f8fafc !important; color: #0f172a !important; }}
     
-    /* Ép nền trắng/xám sáng cho toàn bộ app, bất chấp chế độ trình duyệt */
-    .stApp {{ 
-        background-color: #f8fafc !important; 
-        color: #0f172a !important; 
-    }}
-    
-    /* Fix chữ trong các input của Streamlit khi ở Dark Mode */
-    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {{
+    /* 2. ÉP MÀU CHỮ & NỀN CHO CÁC Ô INPUT (Fix lỗi Dark Mode) */
+    .stTextInput input, 
+    .stTextArea textarea, 
+    .stSelectbox div[data-baseweb="select"], 
+    .stMultiSelect div[data-baseweb="select"] {{
         background-color: #ffffff !important;
         color: #0f172a !important;
         border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
     }}
-    .stMarkdown, .stText, h1, h2, h3, p {{
+    
+    /* 2.1 Fix Dropdown Menu (Khi bấm vào Selectbox) */
+    ul[data-testid="stSelectboxVirtualDropdown"] {{
+        background-color: white !important;
+    }}
+    li[role="option"] {{
         color: #0f172a !important;
+    }}
+
+    /* 3. FIX KHUNG UPLOAD FILE (Fix lỗi nền đen thui) */
+    div[data-testid="stFileUploader"] {{
+        background-color: #ffffff !important;
+        border: 1px dashed #cbd5e1 !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+    }}
+    div[data-testid="stFileUploader"] section {{
+        background-color: #f8fafc !important;
+    }}
+    div[data-testid="stFileUploader"] span, 
+    div[data-testid="stFileUploader"] small, 
+    div[data-testid="stFileUploader"] label {{
+        color: #64748b !important;
+    }}
+    div[data-testid="stFileUploader"] button {{
+        background-color: white !important;
+        color: #0f172a !important;
+        border: 1px solid #e2e8f0 !important;
+    }}
+
+    /* 4. CHỈNH LẠI MÀU CHỮ CƠ BẢN */
+    h1, h2, h3, p, label, span, div {{
+        color: #0f172a !important;
+    }}
+    
+    /* Ngoại lệ: Chữ trong nút bấm màu xanh thì phải trắng */
+    .stButton > button p {{
+        color: white !important;
     }}
 
     header, footer {{ display: none !important; }}
     .block-container {{ padding-top: 1rem !important; max-width: 1400px !important; }}
 
-    /* 2. NAVBAR RESPONSIVE */
+    /* 5. NAVBAR RESPONSIVE */
     .nav-container {{
         background: white; 
         border-bottom: 1px solid #e2e8f0;
@@ -150,32 +190,29 @@ st.markdown(f"""
         display: flex; 
         justify-content: space-between; 
         align-items: center;
-        flex-wrap: wrap; /* Cho phép xuống dòng trên mobile */
+        flex-wrap: wrap; 
         gap: 10px;
     }}
     .logo-section {{ display: flex; align-items: center; gap: 12px; }}
     .logo-img {{ width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }}
-    .brand-text {{ font-size: 18px; font-weight: 700; color: #0f172a; }}
+    .brand-text {{ font-size: 18px; font-weight: 700; color: #0f172a !important; }}
     
     .status-group {{ display: flex; gap: 12px; align-items: center; }}
     
-    /* 3. INPUT & BUTTON */
-    div[data-testid="stTextInput"] input, div[data-testid="stSelectbox"] > div > div {{
-        border-radius: 12px; height: 45px;
-    }}
+    /* 6. BUTTON STYLE */
     .stButton > button {{
         background-color: #2563eb !important; 
         color: white !important; 
         border-radius: 12px; 
-        height: 50px; 
+        height: 40px; 
         font-weight: 600;
         width: 100%; 
-        transition: all 0.2s; 
         border: none;
+        transition: all 0.2s;
     }}
     .stButton > button:hover {{ background-color: #1d4ed8 !important; transform: translateY(-1px); }}
 
-    /* 4. CARDS */
+    /* 7. CARDS */
     .card {{ 
         background: white; 
         border-radius: 20px; 
@@ -185,11 +222,11 @@ st.markdown(f"""
         height: 100%; 
     }}
     
-    /* 5. MOBILE OPTIMIZATION (Media Queries) */
+    /* 8. MOBILE OPTIMIZATION */
     @media (max-width: 640px) {{
         .nav-container {{
             padding: 0.8rem;
-            flex-direction: column; /* Xếp dọc trên mobile */
+            flex-direction: column;
             align-items: flex-start;
         }}
         .status-group {{
@@ -198,8 +235,6 @@ st.markdown(f"""
             margin-top: 5px;
         }}
         .brand-text {{ font-size: 16px; }}
-        
-        /* Chỉnh lại padding của các container */
         .block-container {{ padding-left: 1rem !important; padding-right: 1rem !important; }}
     }}
 </style>
@@ -393,7 +428,7 @@ with col_l:
 
 with col_r:
     if not st.session_state.processing_done:
-        st.markdown("""<h1 style="font-size:2.5rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem; line-height:1.2;">Biến Video thành <span style="color:#2563eb;">Viral Content</span></h1><p style="color:#64748b; font-size:1rem; margin-bottom:2rem;">Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc AI.</p>""", unsafe_allow_html=True)
+        st.markdown("""<h1 style="font-size:2.5rem; font-weight:800; color:#0f172a !important; margin-bottom:0.5rem; line-height:1.2;">Biến Video thành <span style="color:#2563eb;">Viral Content</span></h1><p style="color:#64748b !important; font-size:1rem; margin-bottom:2rem;">Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc AI.</p>""", unsafe_allow_html=True)
         if ("A4" in pillar or "A5" in pillar) and not prod_info: st.warning("⚠️ Tuyến này cần chọn sản phẩm ở cột trái.")
         
         t1, t2, t3 = st.tabs(["📄 Văn bản", "☁️ File Upload", "🔗 Link Video"])
@@ -412,9 +447,7 @@ with col_r:
                 if up:
                     with st.status("🚀 Đang xử lý..."):
                         with open("downloaded_video.mp4", "wb") as f: f.write(up.getbuffer())
-                        # Tách audio từ file vừa up
                         os.system(f'ffmpeg -i "downloaded_video.mp4" -vn -acodec libmp3lame -q:a 2 "downloaded_audio.mp3" -y -loglevel quiet')
-                        
                         raw = transcribe_audio("downloaded_audio.mp3", load_whisper_model())
                         sc = rewrite_with_gemini(raw, pillar, prod_info)
                         st.session_state.data.update({"videoTitle": up.name, "originalTranscript": raw, "rewrittenScript": sc, "generatedAudio": None})
@@ -427,7 +460,6 @@ with col_r:
                 if lnk:
                     with st.status("🚀 Đang xử lý..."):
                         try:
-                            # TẢI VIDEO & AUDIO
                             v_path, a_path, title = download_media(lnk)
                             st.write("🎧 Tách giọng...")
                             raw = transcribe_audio(a_path, load_whisper_model())
@@ -444,7 +476,6 @@ with col_r:
         ct.markdown("### 🎯 Kết quả xử lý")
         st.divider()
         
-        # --- HIỂN THỊ FILE GỐC (VIDEO & AUDIO) ---
         c_src_vid, c_src_aud = st.columns(2)
         with c_src_vid:
             if os.path.exists("downloaded_video.mp4"):
@@ -458,7 +489,6 @@ with col_r:
                     st.download_button("⬇️ Tải Audio Gốc", f, "audio_goc.mp3", use_container_width=True)
         
         st.divider()
-        
         with st.expander("📄 Xem nội dung gốc (Transcript)", expanded=False):
             st.text_area("Original", value=st.session_state.data["originalTranscript"], height=200)
         
