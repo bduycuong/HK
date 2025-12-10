@@ -86,7 +86,7 @@ st.markdown(f"""
         border-radius: 12px; border: 1px solid #e2e8f0; height: 45px;
     }}
     .stButton > button {{
-        background-color: #2563eb; color: white; border-radius: 12px; height: 35px; font-weight: 600;
+        background-color: #2563eb; color: white; border-radius: 12px; height: 40px; font-weight: 600;
         width: 100%; transition: all 0.2s; border: none;
     }}
     .stButton > button:hover {{ background-color: #1d4ed8; transform: translateY(-1px); }}
@@ -259,7 +259,7 @@ st.markdown(f"""
 col_strategy, col_main = st.columns([3, 7], gap="large")
 
 with col_strategy:
-    st.subheader("🔁Chiến lược Content")
+    st.subheader("🛠️ Chiến lược Content")
     st.markdown("**1. Tuyến nội dung**")
     selected_pillar = st.selectbox(
         "Hướng triển khai:",
@@ -359,8 +359,8 @@ with col_main:
                         except Exception as e: st.error(str(e))
 
         with tab3:
-            c_in, c_btn = st.columns([3.5, 1.5], vertical_alignment="bottom")
-            url = c_in.text_input("Link Video", placeholder="TikTok / Reel / YouTube Shorts...", label_visibility="collapsed")
+            c_in, c_btn = st.columns([14, 2], vertical_alignment="bottom")
+            url = c_in.text_input("Link Video", placeholder="TikTok / YouTube Shorts...", label_visibility="collapsed")
             if c_btn.button("Phân tích", type="primary", key="btn_link"):
                 if url:
                     with st.status("🚀 Đang xử lý...", expanded=True):
@@ -375,6 +375,8 @@ with col_main:
                             st.session_state.processing_done = True
                             st.rerun()
                         except Exception as e: st.error(str(e))
+                        # --- MÔ TẢ ĐÃ THÊM MỚI TẠI ĐÂY ---
+            st.caption("Paste link video các nền tảng Tiktok/Facebook/Instagram/Youtube Short/ Xhs / Douyin vào để AI trích xuất nội dung và viết lại kịch bản theo phong cách HuyK.")
 
     else:
         c_back, c_title = st.columns([1.5, 8], vertical_alignment="center")
@@ -421,8 +423,3 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
-
-
-
-
