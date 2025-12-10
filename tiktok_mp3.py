@@ -360,7 +360,7 @@ with col_main:
 
         with tab3:
             c_in, c_btn = st.columns([3.5, 1.5], vertical_alignment="bottom")
-            url = c_in.text_input("Link Video", placeholder="TikTok / YouTube Shorts...", label_visibility="collapsed")
+            url = c_in.text_input("Link Video", placeholder="TikTok / Reel / YouTube Shorts...", label_visibility="collapsed")
             if c_btn.button("Phân tích", type="primary", key="btn_link"):
                 if url:
                     with st.status("🚀 Đang xử lý...", expanded=True):
@@ -421,4 +421,5 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
