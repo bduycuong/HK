@@ -9,8 +9,16 @@ import json
 import whisper
 import pandas as pd
 
-https://i.ibb.co/5grLnPjW/logohk.png
+# --- 1. CẤU HÌNH TRANG & ICON TAB ---
+# [THAY ĐỔI ICON TAB Ở ĐÂY]
+TAB_ICON_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
 
+st.set_page_config(
+    page_title="HuyK AI Studio", 
+    page_icon=TAB_ICON_URL,  # <--- ĐÃ THAY ICON TAB BẰNG LINK ẢNH
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 # --- 2. CẤU HÌNH LOGO & GIAO DIỆN ---
 # [THAY ĐỔI LOGO Ở ĐÂY] - Dán link ảnh logo của bạn vào giữa 2 dấu ngoặc kép
 LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
@@ -412,5 +420,4 @@ with col_main:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
-
         st.markdown('</div>', unsafe_allow_html=True)
