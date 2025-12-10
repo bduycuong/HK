@@ -137,7 +137,7 @@ st.markdown(f"""
         border-radius: 12px; border: 1px solid #e2e8f0; height: 45px;
     }}
     .stButton > button {{
-        background-color: #2563eb; color: white; border-radius: 12px; height: 50px; font-weight: 600;
+        background-color: #2563eb; color: white; border-radius: 12px; height: 40px; font-weight: 600;
         width: 100%; transition: all 0.2s; border: none;
     }}
     .stButton > button:hover {{ background-color: #1d4ed8; transform: translateY(-1px); }}
@@ -503,4 +503,5 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
