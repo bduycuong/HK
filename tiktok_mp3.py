@@ -10,7 +10,7 @@ import whisper
 import pandas as pd
 
 # --- 1. CẤU HÌNH TRANG & ICON ---
-TAB_ICON_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
+TAB_ICON_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
 st.set_page_config(
     page_title="HuyK AI Studio", 
     page_icon=TAB_ICON_URL,
@@ -19,41 +19,44 @@ st.set_page_config(
 )
 
 # --- 2. CẤU HÌNH LOGO ---
-LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
+LOGO_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
 
 # ==========================================
 # 🔐 HỆ THỐNG ĐĂNG NHẬP (LOGIN SYSTEM)
 # ==========================================
 def check_login():
-    # Nếu đã đăng nhập rồi thì bỏ qua
+    # Nếu đã đăng nhập rồi thì return True
     if st.session_state.get('logged_in', False):
         return True
 
     # Giao diện đăng nhập
     st.markdown(f"""
-        <div style="display:flex; justify-content:center; margin-top:50px;">
+        <div style="display:flex; justify-content:center; margin-top:50px; margin-bottom:20px;">
             <img src="{LOGO_URL}" width="80" style="border-radius:10px;">
         </div>
-        <h2 style="text-align:center;">HuyK AI Studio</h2>
-        <p style="text-align:center; color:grey;">Vui lòng đăng nhập để sử dụng</p>
+        <h2 style="text-align:center; font-family:'Inter', sans-serif;">HuyK AI Studio</h2>
+        <p style="text-align:center; color:#64748b;">Vui lòng đăng nhập để sử dụng hệ thống</p>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        username = st.text_input("Tài khoản")
-        password = st.text_input("Mật khẩu", type="password")
-        
-        if st.button("Đăng nhập", use_container_width=True):
-            # Kiểm tra trong Secrets
-            users_db = st.secrets.get("users", {})
+        with st.form("login_form"):
+            username = st.text_input("Tài khoản")
+            password = st.text_input("Mật khẩu", type="password")
+            submit = st.form_submit_button("Đăng nhập", use_container_width=True)
             
-            if username in users_db and users_db[username] == password:
-                st.session_state.logged_in = True
-                st.success("Đăng nhập thành công!")
-                time.sleep(0.5)
-                st.rerun()
-            else:
-                st.error("❌ Sai tài khoản hoặc mật khẩu")
+            if submit:
+                # Kiểm tra tài khoản trong Secrets
+                users_db = st.secrets.get("users", {})
+                
+                if username in users_db and users_db[username] == password:
+                    st.session_state.logged_in = True
+                    st.session_state.current_user = username
+                    st.success("✅ Đăng nhập thành công!")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("❌ Sai tài khoản hoặc mật khẩu")
     
     return False
 
@@ -146,11 +149,38 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # --- 6. CẤU HÌNH & HÀM CÀI ĐẶT ---
+CONFIG_FILE = "app_config.txt"
 DEFAULT_PROMPT = """Nhiệm vụ: Viết lại nội dung video TikTok theo phong cách HuyK."""
+
+def load_config():
+    config = {
+        "minimax_voice": "", "minimax_model": "speech-2.6-hd", 
+        "prompt": DEFAULT_PROMPT, "memory": ""
+    }
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                for line in f:
+                    if "=" in line:
+                        k, v = line.strip().split("=", 1)
+                        # Chỉ load config chung, KHÔNG load key từ file (nếu có)
+                        if "key" not in k.lower(): 
+                            config[k] = v.replace("\\n", "\n").strip()
+        except: pass
+    return config
+
+def save_config(mm_voice, mm_model, prompt, memory):
+    # Lưu config chung vào file server (Voice ID, Model, Prompt)
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        clean_prompt = prompt.replace("\n", "\\n")
+        clean_memory = memory.replace("\n", "\\n")
+        f.write(f"minimax_voice={mm_voice.strip()}\nminimax_model={mm_model.strip()}\nprompt={clean_prompt}\nmemory={clean_memory}\n")
+
+config = load_config()
 
 @st.dialog("⚙️ Cài đặt Cá nhân")
 def open_settings():
-    st.caption("🔑 Nhập API Key của riêng bạn để sử dụng.")
+    st.caption("🔑 Nhập API Key của riêng bạn để sử dụng. Key sẽ không bị lưu lên server.")
     
     gemini_input = st.text_input("Gemini API Key", value=st.session_state.user_gemini_key, type="password", help="Trình duyệt sẽ tự gợi ý lưu mật khẩu này cho lần sau.")
     minimax_input = st.text_input("Minimax API Key", value=st.session_state.user_minimax_key, type="password")
@@ -158,20 +188,34 @@ def open_settings():
     c1, c2 = st.columns(2)
     with c1: 
         model_options = ["speech-2.6-hd", "speech-01-turbo", "speech-01-hd", "speech-02"]
-        model_input = st.selectbox("Model", model_options, index=0)
+        current = config.get("minimax_model", "speech-2.6-hd")
+        # Đồng bộ model nếu chưa có trong session
+        idx = model_options.index(current) if current in model_options else 0
+        model_input = st.selectbox("Model", model_options, index=idx)
     with c2: 
-        voice_input = st.text_input("Voice ID", value=st.session_state.user_voice_id)
+        voice_val = st.session_state.user_voice_id if st.session_state.user_voice_id else config.get("minimax_voice", "")
+        voice_input = st.text_input("Voice ID", value=voice_val)
     
     st.divider()
     st.markdown("🧠 **Bộ nhớ Agent (Của riêng bạn)**")
-    memory_input = st.text_area("Quy tắc ghi nhớ", value=st.session_state.user_memory, height=100, placeholder="Ví dụ: Không bao giờ báo giá trực tiếp...")
+    memory_val = st.session_state.user_memory if st.session_state.user_memory else config.get("memory", "")
+    memory_input = st.text_area("Quy tắc ghi nhớ", value=memory_val, height=100)
+
+    # Prompt gốc (Admin mới sửa được) - Có thể ẩn nếu muốn
+    with st.expander("📝 Prompt Gốc (Cấu hình chung)"):
+        new_prompt = st.text_area("Base Prompt", value=config["prompt"], height=100)
 
     if st.button("Lưu cấu hình (Phiên này)", type="primary"):
+        # Lưu vào Session State (Cá nhân)
         st.session_state.user_gemini_key = gemini_input
         st.session_state.user_minimax_key = minimax_input
         st.session_state.user_voice_id = voice_input
         st.session_state.user_memory = memory_input
-        st.success("✅ Đã cập nhật!")
+        
+        # Lưu Config chung (Prompt, Voice mặc định) vào file server
+        save_config(voice_input, model_input, new_prompt, memory_input)
+        
+        st.success("✅ Đã cập nhật! Hãy để trình duyệt lưu mật khẩu API Key để lần sau không phải nhập lại.")
         time.sleep(1.5)
         st.rerun()
 
@@ -212,7 +256,7 @@ def rewrite_with_gemini(original_text, pillar, product_info=""):
         memory_instruction = f"\n--- 🧠 BỘ NHỚ QUY TẮC RIÊNG ---\n{st.session_state.user_memory}\n------------------------------\n"
 
     system_instruction = f"""
-    {DEFAULT_PROMPT}
+    {config["prompt"]}
     {memory_instruction}
     --- YÊU CẦU CỤ THỂ CHO BÀI NÀY ---
     1. TUYẾN NỘI DUNG: {pillar}
@@ -220,9 +264,10 @@ def rewrite_with_gemini(original_text, pillar, product_info=""):
     2. SẢN PHẨM CẦN LỒNG GHÉP (Nếu có):
     {product_info if product_info else "Không có sản phẩm cụ thể, tập trung vào nội dung chính."}
     3. QUY TẮC VIẾT:
+    - Không cần mở đầu bằng xin chào
     - Nếu là tuyến A4: Tuyệt đối KHÔNG báo giá trực tiếp, KHÔNG kêu gọi "mua ngay". Hãy tập trung vào CÂU CHUYỆN KHÁCH HÀNG.
     - Giọng văn: Chân thật, trầm, tâm sự (style HuyK).
-    - Xưng hô: "HuyK", gọi khách là "anh chị".
+    - Xưng hô: "HuyK", gọi khách là "anh, chị, bạn, mọi người, anh khách, chị khách".
     - Độ dài: Phù hợp kịch bản video ngắn (khoảng 40s - 90s).
     """
 
@@ -239,9 +284,9 @@ def generate_minimax_audio(text):
     if api_key.lower().startswith("bearer "): api_key = api_key[7:].strip()
     
     voice_id = st.session_state.user_voice_id.strip()
-    if not voice_id: voice_id = "speech-01-hd" 
+    if not voice_id: voice_id = config.get("minimax_voice", "speech-01-hd") 
 
-    model_id = "speech-2.6-hd"
+    model_id = config.get("minimax_model", "speech-2.6-hd")
     
     url = "https://api.minimax.io/v1/t2a_v2"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
@@ -267,12 +312,13 @@ def generate_minimax_audio(text):
 
 # --- 7. UI CHÍNH ---
 
-# Nút Logout ở góc
+# Hiển thị nút Đăng xuất ở Sidebar
 with st.sidebar:
-    st.write(f"👤 Đang nhập: **{st.secrets.get('users', {}).get('admin', 'User')}**" if 'logged_in' in st.session_state else "")
-    if st.button("Đăng xuất", use_container_width=True):
-        st.session_state.logged_in = False
-        st.rerun()
+    if 'logged_in' in st.session_state and st.session_state.logged_in:
+        st.write(f"👤 Hi, **{st.session_state.current_user}**")
+        if st.button("Đăng xuất", use_container_width=True):
+            st.session_state.logged_in = False
+            st.rerun()
 
 st.markdown(f"""
 <div class="nav-container">
@@ -386,6 +432,7 @@ with col_main:
                             raw = transcribe_audio("temp.mp3", load_whisper_model())
                             st.write(f"💎 Đang viết theo tuyến: {selected_pillar}...")
                             rewrite = rewrite_with_gemini(raw, selected_pillar, selected_product_info_str)
+                            # COPY FILE ĐỂ DÙNG Ở TRANG KẾT QUẢ
                             shutil.copy("temp.mp3", "downloaded_audio.mp3") 
                             st.session_state.data.update({"videoTitle": uploaded_file.name, "originalTranscript": raw, "rewrittenScript": rewrite, "generatedAudio": None})
                             st.session_state.processing_done = True
@@ -419,9 +466,11 @@ with col_main:
         c_title.markdown(f"### 🎯 Kết quả xử lý")
         st.divider()
         
+        # --- HIỂN THỊ FILE GỐC ---
         if os.path.exists("downloaded_audio.mp3"):
             st.markdown("**🔊 Audio/Video Gốc:**")
             st.audio("downloaded_audio.mp3", format="audio/mp3")
+        # -------------------------
         
         with st.expander("📄 Xem nội dung gốc (Transcript)", expanded=False):
             st.text_area("Original", value=st.session_state.data["originalTranscript"], height=200)
@@ -430,8 +479,10 @@ with col_main:
         new_script = st.text_area("Editor", value=st.session_state.data["rewrittenScript"], height=400, label_visibility="collapsed")
         if new_script != st.session_state.data["rewrittenScript"]: st.session_state.data["rewrittenScript"] = new_script
         
+        # --- HIỂN THỊ SỐ KÝ TỰ ---
         char_count = len(st.session_state.data["rewrittenScript"])
         st.caption(f"📝 Số ký tự: {char_count} | ⏳ Ước tính audio: ~{int(char_count/15)} giây")
+        # -------------------------
 
         st.markdown('<div class="card" style="margin-top:20px; background:#f8fafc">', unsafe_allow_html=True)
         if not st.session_state.data["generatedAudio"]:
