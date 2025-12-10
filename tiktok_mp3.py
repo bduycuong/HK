@@ -14,39 +14,43 @@ st.set_page_config(
     page_title="HuyK AI Creator", 
     page_icon="💎", 
     layout="wide",
-    initial_sidebar_state="collapsed" # Ẩn sidebar mặc định vì đã đưa ra ngoài
+    initial_sidebar_state="collapsed"
 )
 
-# --- 2. ĐỊNH NGHĨA TUYẾN NỘI DUNG ---
+# --- 2. CẤU HÌNH LOGO & GIAO DIỆN ---
+# [THAY ĐỔI LOGO Ở ĐÂY] - Dán link ảnh logo của bạn vào giữa 2 dấu ngoặc kép
+LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
+
+# --- 3. ĐỊNH NGHĨA TUYẾN NỘI DUNG ---
 PILLAR_DEFINITIONS = {
     "A1: Traffic - Mẹo & Tin tức": """
     - Mục tiêu: Thu hút người xem, viral.
-    - Nội dung: Chia sẻ mẹo vặt (đánh sáng, cài khuy), câu hỏi thú vị (vàng ăn được không?), soi đồ người nổi tiếng, tin tức ngành kim hoàn.
+    - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
     """,
     "A2: Kiến thức - Chuyên gia": """
     - Mục tiêu: Thể hiện sự hiểu biết, chuyên gia.
-    - Nội dung: Lịch sử thương hiệu, thuật ngữ (Phật giáo mật tông, Hư Không Tạng...), phân biệt chất liệu (vàng/bạc/bạch kim), dạy nghề kim hoàn.
+    - Nội dung: Lịch sử thương hiệu, thuật ngữ chuyên ngành, phân biệt chất liệu, dạy nghề.
     - Phong cách: Trầm ổn, sâu sắc, giải thích dễ hiểu, uy tín.
     """,
     "A3: Uy tín - Niềm tin": """
     - Mục tiêu: Xây dựng lòng tin.
-    - Nội dung: Hoạt động cửa hàng, giải thưởng, từ thiện, giao hàng, kể chuyện bảo hành/sửa chữa, đọc comment tư vấn, tâm sự nghề.
+    - Nội dung: Hoạt động cửa hàng, giải thưởng, giao hàng, kể chuyện bảo hành, tâm sự nghề.
     - Phong cách: Chân thành, kể chuyện (storytelling), tự hào.
     """,
     "A4: Chuyển đổi - Bán hàng": """
     - Mục tiêu: Thúc đẩy mua hàng, chốt đơn.
-    - Nội dung: Top list (nhẫn nam dưới 10tr, bán chạy...), tâm sự cảm xúc (buồn/vui cùng khách), trả lời comment bán hàng, tư vấn theo tuổi/nghề nghiệp, gợi ý ngân sách (500k mua gì, combo 40tr), so sánh giá trị.
-    - Phong cách: Kêu gọi hành động (Call to action), nhấn mạnh lợi ích, khơi gợi nhu cầu.
+    - Nội dung: Top list, tâm sự cảm xúc, trả lời cmt bán hàng, tư vấn phong thủy/nghề nghiệp, gợi ý ngân sách.
+    - Phong cách: Call to action, nhấn mạnh lợi ích, khơi gợi nhu cầu.
     """,
     "A5: Tổng hợp - Branding & Sales": """
     - Mục tiêu: Kết hợp kiến thức, uy tín và bán hàng.
-    - Nội dung: Tổng hợp các yếu tố từ A1-A4. Chia sẻ kiến thức đi kèm sự uy tín và khéo léo lồng ghép sản phẩm vào cuối.
-    - Phong cách: Linh hoạt, dẫn dắt khéo léo từ thông tin sang sản phẩm.
+    - Nội dung: Tổng hợp A1-A4. Chia sẻ kiến thức đi kèm uy tín và lồng ghép sản phẩm.
+    - Phong cách: Linh hoạt, dẫn dắt khéo léo sang sản phẩm.
     """
 }
 
-# --- 3. SESSION STATE ---
+# --- 4. SESSION STATE ---
 if 'processing_done' not in st.session_state: st.session_state.processing_done = False
 if 'product_df' not in st.session_state: st.session_state.product_df = None
 if 'data' not in st.session_state: 
@@ -55,51 +59,61 @@ if 'data' not in st.session_state:
         "rewrittenScript": "", "generatedAudio": None
     }
 
-# --- 4. CSS TINH CHỈNH GIAO DIỆN ---
-st.markdown("""
+# --- 5. CSS TINH CHỈNH GIAO DIỆN (Đã sửa lỗi thanh trắng) ---
+st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    * { font-family: 'Inter', sans-serif; }
-    .stApp { background-color: #f8fafc; color: #0f172a; }
-    header, footer { display: none !important; }
-    .block-container { padding-top: 1rem !important; max-width: 1400px !important; }
+    * {{ font-family: 'Inter', sans-serif; }}
+    .stApp {{ background-color: #f8fafc; color: #0f172a; }}
+    header, footer {{ display: none !important; }}
+    .block-container {{ padding-top: 1rem !important; max-width: 1400px !important; }}
 
-    /* Navbar */
-    .nav-container {
-        background: white; border-bottom: 1px solid #e2e8f0;
-        padding: 0.8rem 1rem; margin-bottom: 2rem; border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    /* Navbar Mới - Xóa margin thừa */
+    .nav-container {{
+        background: white; 
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.8rem 1.5rem; 
+        margin-bottom: 1.5rem; /* Giảm khoảng cách dưới */
+        border-radius: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         display: flex; justify-content: space-between; align-items: center;
-    }
-    .logo-box { background: #0f172a; color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .brand-text { font-size: 16px; font-weight: 700; color: #0f172a; }
+    }}
+    
+    /* Logo Image Style */
+    .logo-img {{
+        width: 40px; 
+        height: 40px; 
+        object-fit: contain;
+        border-radius: 6px;
+    }}
+    
+    .brand-text {{ font-size: 18px; font-weight: 700; color: #0f172a; margin-left: 10px; }}
     
     /* Input & Button */
-    div[data-testid="stTextInput"] input, div[data-testid="stSelectbox"] > div > div {
+    div[data-testid="stTextInput"] input, div[data-testid="stSelectbox"] > div > div {{
         border-radius: 12px; border: 1px solid #e2e8f0; height: 45px;
-    }
-    .stButton > button {
-        background-color: #2563eb; color: white; border-radius: 12px; height: 50px; font-weight: 600;
-        width: 100%; transition: all 0.2s;
-    }
-    .stButton > button:hover { background-color: #1d4ed8; transform: translateY(-1px); }
+    }}
+    .stButton > button {{
+        background-color: #2563eb; color: white; border-radius: 12px; height: 40px; font-weight: 600;
+        width: 100%; transition: all 0.2s; border: none;
+    }}
+    .stButton > button:hover {{ background-color: #1d4ed8; transform: translateY(-1px); }}
 
     /* Cards */
-    .card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.03); height: 100%; }
-    .card-title { font-weight: 700; color: #334155; font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}
+    .card {{ background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.03); height: 100%; }}
+    .card-title {{ font-weight: 700; color: #334155; font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}}
     
-    /* Strategy Box Style */
-    .strategy-box {
+    .strategy-box {{
         background-color: #fff;
         border: 1px solid #cbd5e1;
         border-radius: 16px;
         padding: 1.5rem;
         height: 100%;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 5. CONFIG & FUNCTIONS ---
+# --- 6. CONFIG & FUNCTIONS ---
 CONFIG_FILE = "app_config.txt"
 DEFAULT_PROMPT = """Nhiệm vụ: Viết lại nội dung video TikTok theo phong cách HuyK."""
 
@@ -125,7 +139,7 @@ def save_config(gemini, mm_key, mm_group, mm_voice, mm_model, prompt):
 
 config = load_config()
 
-# --- KHAI BÁO HÀM SETTINGS SỚM ĐỂ FIX LỖI ---
+# ĐƯA HÀM SETTINGS LÊN TRƯỚC ĐỂ TRÁNH LỖI NAME ERROR
 @st.dialog("⚙️ Cài đặt hệ thống")
 def open_settings():
     st.caption("Cấu hình API Key để sử dụng tính năng.")
@@ -174,24 +188,19 @@ def rewrite_with_gemini(original_text, pillar, product_info=""):
     if not config["gemini_key"]: return "⚠️ Vui lòng nhập API Key trong cài đặt."
     
     pillar_instruction = PILLAR_DEFINITIONS.get(pillar, "")
-    
     system_instruction = f"""
     {config["prompt"]}
-    
     --- YÊU CẦU CỤ THỂ CHO BÀI NÀY ---
     1. TUYẾN NỘI DUNG: {pillar}
     {pillar_instruction}
-    
     2. SẢN PHẨM CẦN LỒNG GHÉP (Nếu có):
     {product_info if product_info else "Không có sản phẩm cụ thể, tập trung vào nội dung chính."}
-    
     3. QUY TẮC VIẾT:
     - Nếu là tuyến A4, A5: Bắt buộc phải nhắc đến thông tin sản phẩm ở trên một cách khéo léo, tự nhiên.
     - Giọng văn: Chân thật, trầm, tâm sự (style HuyK).
     - Xưng hô: "HuyK", gọi khách là "anh chị".
     - Độ dài: Phù hợp kịch bản video ngắn (khoảng 40s - 90s).
     """
-
     try:
         genai.configure(api_key=config["gemini_key"])
         model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_instruction) 
@@ -204,7 +213,6 @@ def generate_minimax_audio(text):
     if api_key.lower().startswith("bearer "): api_key = api_key[7:].strip()
     voice_id = config["minimax_voice"].strip()
     model_id = config.get("minimax_model", "speech-2.6-hd").strip()
-    
     if not api_key: return None, "Thiếu API Key"
     
     url = "https://api.minimax.io/v1/t2a_v2"
@@ -214,7 +222,6 @@ def generate_minimax_audio(text):
         "voice_setting": {"voice_id": voice_id, "speed": 1.0, "vol": 1.0, "pitch": 0},
         "audio_setting": {"sample_rate": 32000, "format": "mp3", "channel": 1}
     }
-    
     try:
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 200:
@@ -231,25 +238,32 @@ def generate_minimax_audio(text):
     except Exception as e: return None, f"Lỗi: {str(e)}"
 
 # --- 7. UI CHÍNH (MAIN) ---
+
+# Navbar Custom với Logo Mới
 st.markdown(f"""
 <div class="nav-container">
-    <div style="display:flex;align-items:center;gap:10px"><div class="logo-box">💎</div><span class="brand-text">HuyK AI Studio</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+        <img src="{LOGO_URL}" class="logo-img">
+        <span class="brand-text">HuyK AI Studio</span>
+    </div>
     <div style="display:flex; gap:12px; align-items:center;">
-        <div class="status-badge" style="{'background:#dcfce7; color:#166534' if config['gemini_key'] else ''}">Gemini</div>
-        <div class="status-badge" style="{'background:#dcfce7; color:#166534' if config['minimax_key'] else ''}">Minimax</div>
+        <div class="status-badge" style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:12px; border:1px solid #e2e8f0; color:{'#166534' if config['gemini_key'] else '#64748b'}; display:flex; align-items:center; gap:5px;">
+            <div style="width:6px; height:6px; border-radius:50%; background:{'#22c55e' if config['gemini_key'] else '#cbd5e1'}"></div> Gemini
+        </div>
+        <div class="status-badge" style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:12px; border:1px solid #e2e8f0; color:{'#166534' if config['minimax_key'] else '#64748b'}; display:flex; align-items:center; gap:5px;">
+            <div style="width:6px; height:6px; border-radius:50%; background:{'#22c55e' if config['minimax_key'] else '#cbd5e1'}"></div> Minimax
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # === LAYOUT 2 CỘT: TRÁI (CHIẾN LƯỢC) - PHẢI (MAIN APP) ===
-col_strategy, col_main = st.columns([3.5, 6.5], gap="large")
+col_strategy, col_main = st.columns([3, 7], gap="large")
 
-# --- CỘT TRÁI: CHIẾN LƯỢC (LUÔN HIỆN) ---
+# --- CỘT TRÁI: CHIẾN LƯỢC ---
 with col_strategy:
-    st.markdown('<div class="strategy-box">', unsafe_allow_html=True)
-    st.subheader("🛠️ Chiến lược Content")
+    st.subheader("Chiến lược Content")
     
-    # 1. Chọn tuyến nội dung
     st.markdown("**1. Tuyến nội dung**")
     selected_pillar = st.selectbox(
         "Hướng triển khai:",
@@ -262,7 +276,6 @@ with col_strategy:
         
     st.divider()
     
-    # 2. Kho sản phẩm
     st.markdown("**2. Kho Sản phẩm**")
     uploaded_products = st.file_uploader("Upload danh sách (Excel/CSV)", type=['xlsx', 'csv'], label_visibility="collapsed")
     
@@ -274,9 +287,7 @@ with col_strategy:
             else:
                 df = pd.read_excel(uploaded_products)
             
-            # Chuẩn hóa tên cột
             df.columns = [c.strip().lower() for c in df.columns]
-            # Map cột
             col_code = next((c for c in df.columns if 'mã' in c or 'code' in c), df.columns[0])
             col_name = next((c for c in df.columns if 'tên' in c or 'name' in c), df.columns[1])
             col_desc = next((c for c in df.columns if 'mô tả' in c or 'desc' in c), df.columns[-1])
@@ -304,15 +315,19 @@ with col_strategy:
     st.divider()
     if st.button("⚙️ Cài đặt API Key", use_container_width=True):
         open_settings()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --- CỘT PHẢI: XỬ LÝ CHÍNH ---
 with col_main:
     if not st.session_state.processing_done:
+        # Header chính
         st.markdown("""
-        <h1 class="hero-title">Biến Video thành <span class="highlight">Viral Content</span></h1>
-        <p class="hero-desc">Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc HuyK.</p>
+        <h1 style="font-size:2.5rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem; line-height:1.2;">
+            Biến Video thành <span style="color:#2563eb;">Viral Content</span>
+        </h1>
+        <p style="color:#64748b; font-size:1rem; margin-bottom:2rem;">
+            Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc HuyK.
+        </p>
         """, unsafe_allow_html=True)
         
         if "A4" in selected_pillar or "A5" in selected_pillar:
@@ -322,7 +337,8 @@ with col_main:
         tab1, tab2, tab3 = st.tabs(["📄 Ý tưởng / Văn bản", "☁️ File Upload", "🔗 Link Video"])
         
         with tab1:
-            raw_input = st.text_area("Nhập ý tưởng thô...", height=150, placeholder="Ví dụ: Khách hỏi 500k mua được nhẫn bạc nào tặng người yêu...")
+            raw_input = st.text_area("Nhập ý tưởng thô...", height=150, placeholder="Ví dụ: Khách hỏi 500k mua được nhẫn bạc nào tặng người yêu...", label_visibility="collapsed")
+            st.write("")
             if st.button("✨ Phân tích & Viết bài", type="primary"):
                 if raw_input:
                     with st.status("🚀 Đang xử lý...", expanded=True):
@@ -333,7 +349,8 @@ with col_main:
                 else: st.toast("Nhập nội dung đi bạn ơi!", icon="⚠️")
 
         with tab2:
-            uploaded_file = st.file_uploader("Upload Video/Audio", type=['mp4', 'mp3', 'wav'])
+            uploaded_file = st.file_uploader("Upload Video/Audio", type=['mp4', 'mp3', 'wav'], label_visibility="collapsed")
+            st.write("")
             if st.button("🚀 Xử lý File", type="primary", key="btn_file"):
                 if uploaded_file:
                     with st.status("🚀 Đang xử lý...", expanded=True):
@@ -376,19 +393,16 @@ with col_main:
         
         st.divider()
         
-        # Transcript gốc
         with st.expander("📄 Xem nội dung gốc (Transcript)", expanded=False):
             st.text_area("Original", value=st.session_state.data["originalTranscript"], height=200)
 
-        # Kịch bản mới
         st.markdown(f"**✨ Kịch bản HuyK ({selected_pillar})**")
         new_script = st.text_area("Editor", value=st.session_state.data["rewrittenScript"], height=400, label_visibility="collapsed")
         if new_script != st.session_state.data["rewrittenScript"]: st.session_state.data["rewrittenScript"] = new_script
         
-        # Audio Player
         st.markdown('<div class="card" style="margin-top:20px; background:#f8fafc">', unsafe_allow_html=True)
         if not st.session_state.data["generatedAudio"]:
-            if st.button("🎙️ Tạo giọng đọc AI", type="primary", use_container_width=True):
+            if st.button("🎙️ Tạo giọng đọc HuyK", type="primary", use_container_width=True):
                 with st.spinner("Đang khởi tạo voice..."):
                     path, err = generate_minimax_audio(st.session_state.data["rewrittenScript"])
                     if path: st.session_state.data["generatedAudio"] = path; st.rerun()
@@ -404,5 +418,4 @@ with col_main:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
-
         st.markdown('</div>', unsafe_allow_html=True)
