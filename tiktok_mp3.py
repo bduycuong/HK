@@ -312,7 +312,7 @@ with col_main:
     if not st.session_state.processing_done:
         st.markdown("""
         <h1 class="hero-title">Biến Video thành <span class="highlight">Viral Content</span></h1>
-        <p class="hero-desc">Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc AI.</p>
+        <p class="hero-desc">Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc HuyK.</p>
         """, unsafe_allow_html=True)
         
         if "A4" in selected_pillar or "A5" in selected_pillar:
@@ -404,4 +404,5 @@ with col_main:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
