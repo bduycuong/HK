@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # --- 2. CẤU HÌNH LOGO ---
-LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png"" 
+LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png"
 
 # ==========================================
 # 🔐 HỆ THỐNG ĐĂNG NHẬP
@@ -517,3 +517,4 @@ with col_r:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
