@@ -40,10 +40,10 @@ PILLAR_DEFINITIONS = {
     - Nội dung: Hoạt động cửa hàng, giải thưởng, giao hàng, kể chuyện bảo hành, tâm sự nghề.
     - Phong cách: Chân thành, kể chuyện (storytelling), tự hào.
     """,
-    "A4: Chuyển đổi - Bán hàng": """
-    - Mục tiêu: Thúc đẩy mua hàng, chốt đơn.
-    - Nội dung: Top list, tâm sự cảm xúc, trả lời cmt bán hàng, tư vấn phong thủy/nghề nghiệp, gợi ý ngân sách.
-    - Phong cách: Call to action, nhấn mạnh lợi ích, khơi gợi nhu cầu.
+    "A4: Chuyển đổi - Kể chuyện khách hàng": """
+    - Mục tiêu: Bán hàng khéo léo (Soft Sell), chạm vào cảm xúc người xem. TUYỆT ĐỐI KHÔNG kêu gọi mua hàng thô thiển, KHÔNG báo giá trực tiếp.
+    - Nội dung: Kể lại câu chuyện của khách hàng (ví dụ: Anh trai mua tặng em gái, chồng mua tặng vợ kỷ niệm ngày cưới...), tâm sự về ý nghĩa món quà, giải quyết nỗi đau/vấn đề của khách bằng sản phẩm.
+    - Phong cách: Kể chuyện (Storytelling), thủ thỉ, tâm tình, sâu sắc, dẫn dắt tự nhiên để người xem tự cảm thấy muốn mua.
     """,
     "A5: Tổng hợp - Branding & Sales": """
     - Mục tiêu: Kết hợp kiến thức, uy tín và bán hàng.
@@ -420,4 +420,5 @@ with col_main:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
