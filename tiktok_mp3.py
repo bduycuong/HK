@@ -373,4 +373,117 @@ with col_l:
         try:
             df = pd.read_csv(up_prod) if up_prod.name.endswith('.csv') else pd.read_excel(up_prod)
             df.columns = [c.strip().lower() for c in df.columns]
-            c_code = next((c for c in df.columns if '
+            c_code = next((c for c in df.columns if 'mã' in c or 'code' in c), df.columns[0])
+            c_name = next((c for c in df.columns if 'tên' in c or 'name' in c), df.columns[1])
+            c_desc = next((c for c in df.columns if 'mô tả' in c or 'desc' in c), df.columns[-1])
+            st.session_state.product_df = df[[c_code, c_name, c_desc]].copy()
+            st.success(f"✅ Tải {len(df)} SP")
+            st.session_state.product_df['display'] = st.session_state.product_df[c_code].astype(str) + " - " + st.session_state.product_df[c_name].astype(str)
+            prod_opts = st.session_state.product_df['display'].tolist()
+        except: st.error("Lỗi file sản phẩm")
+    
+    sel_prods = st.multiselect("Chọn sản phẩm:", prod_opts)
+    prod_info = ""
+    if sel_prods and st.session_state.product_df is not None:
+        rows = st.session_state.product_df[st.session_state.product_df['display'].isin(sel_prods)]
+        prod_info = "\n".join([f"- {r[rows.columns[0]]}: {r[rows.columns[1]]} ({r[rows.columns[2]]})" for i, r in rows.iterrows()])
+    
+    st.divider()
+    if st.button("⚙️ Cài đặt API Key", use_container_width=True): open_settings()
+
+with col_r:
+    if not st.session_state.processing_done:
+        st.markdown("""<h1 style="font-size:2.5rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem; line-height:1.2;">Biến Video thành <span style="color:#2563eb;">Viral Content</span></h1><p style="color:#64748b; font-size:1rem; margin-bottom:2rem;">Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc AI.</p>""", unsafe_allow_html=True)
+        if ("A4" in pillar or "A5" in pillar) and not prod_info: st.warning("⚠️ Tuyến này cần chọn sản phẩm ở cột trái.")
+        
+        t1, t2, t3 = st.tabs(["📄 Văn bản", "☁️ File Upload", "🔗 Link Video"])
+        with t1:
+            txt = st.text_area("Ý tưởng...", height=150, placeholder="Ví dụ: Khách hỏi 500k mua gì...", label_visibility="collapsed")
+            if st.button("✨ Phân tích", type="primary", key="b1"):
+                if txt:
+                    with st.status("🚀 Đang xử lý..."):
+                        sc = rewrite_with_gemini(txt, pillar, prod_info)
+                        st.session_state.data.update({"videoTitle": "Văn bản", "originalTranscript": txt, "rewrittenScript": sc, "generatedAudio": None})
+                        st.session_state.processing_done = True
+                        st.rerun()
+        with t2:
+            up = st.file_uploader("Upload", type=['mp4', 'mp3', 'wav'], label_visibility="collapsed")
+            if st.button("🚀 Xử lý", type="primary", key="b2"):
+                if up:
+                    with st.status("🚀 Đang xử lý..."):
+                        with open("downloaded_video.mp4", "wb") as f: f.write(up.getbuffer())
+                        # Tách audio từ file vừa up
+                        os.system(f'ffmpeg -i "downloaded_video.mp4" -vn -acodec libmp3lame -q:a 2 "downloaded_audio.mp3" -y -loglevel quiet')
+                        
+                        raw = transcribe_audio("downloaded_audio.mp3", load_whisper_model())
+                        sc = rewrite_with_gemini(raw, pillar, prod_info)
+                        st.session_state.data.update({"videoTitle": up.name, "originalTranscript": raw, "rewrittenScript": sc, "generatedAudio": None})
+                        st.session_state.processing_done = True
+                        st.rerun()
+        with t3:
+            c_lnk, c_bt = st.columns([5, 1], vertical_alignment="bottom")
+            lnk = c_lnk.text_input("Link", placeholder="TikTok/YouTube...", label_visibility="collapsed")
+            if c_bt.button("Phân tích", type="primary", key="b3"):
+                if lnk:
+                    with st.status("🚀 Đang xử lý..."):
+                        try:
+                            # TẢI VIDEO & AUDIO
+                            v_path, a_path, title = download_media(lnk)
+                            st.write("🎧 Tách giọng...")
+                            raw = transcribe_audio(a_path, load_whisper_model())
+                            st.write("💎 Viết kịch bản...")
+                            sc = rewrite_with_gemini(raw, pillar, prod_info)
+                            st.session_state.data.update({"videoTitle": title, "originalTranscript": raw, "rewrittenScript": sc, "generatedAudio": None})
+                            st.session_state.processing_done = True
+                            st.rerun()
+                        except Exception as e: st.error(str(e))
+            st.caption("Paste link video Tiktok/FB/YouTube/Douyin... để AI trích xuất và sáng tạo lại.")
+    else:
+        cb, ct = st.columns([1.5, 8], vertical_alignment="center")
+        if cb.button("← Quay lại"): st.session_state.processing_done = False; st.rerun()
+        ct.markdown("### 🎯 Kết quả xử lý")
+        st.divider()
+        
+        # --- HIỂN THỊ FILE GỐC (VIDEO & AUDIO) ---
+        c_src_vid, c_src_aud = st.columns(2)
+        with c_src_vid:
+            if os.path.exists("downloaded_video.mp4"):
+                st.video("downloaded_video.mp4")
+                with open("downloaded_video.mp4", "rb") as f:
+                    st.download_button("⬇️ Tải Video Gốc", f, "video_goc.mp4", use_container_width=True)
+        with c_src_aud:
+            if os.path.exists("downloaded_audio.mp3"):
+                st.audio("downloaded_audio.mp3")
+                with open("downloaded_audio.mp3", "rb") as f:
+                    st.download_button("⬇️ Tải Audio Gốc", f, "audio_goc.mp3", use_container_width=True)
+        
+        st.divider()
+        
+        with st.expander("📄 Xem nội dung gốc (Transcript)", expanded=False):
+            st.text_area("Original", value=st.session_state.data["originalTranscript"], height=200)
+        
+        st.markdown(f"**✨ Kịch bản HuyK ({pillar})**")
+        new_sc = st.text_area("Editor", value=st.session_state.data["rewrittenScript"], height=400, label_visibility="collapsed")
+        if new_sc != st.session_state.data["rewrittenScript"]: st.session_state.data["rewrittenScript"] = new_sc
+        
+        cnt = len(st.session_state.data["rewrittenScript"])
+        st.caption(f"📝 {cnt} ký tự | ⏳ Audio: ~{int(cnt/15)}s")
+
+        st.markdown('<div class="card" style="margin-top:20px; background:#f8fafc">', unsafe_allow_html=True)
+        if not st.session_state.data["generatedAudio"]:
+            if st.button("🎙️ Tạo giọng đọc AI", type="primary", use_container_width=True):
+                with st.spinner("Đang tạo voice..."):
+                    p, e = generate_minimax_audio(st.session_state.data["rewrittenScript"])
+                    if p: st.session_state.data["generatedAudio"] = p; st.rerun()
+                    else: st.error(e)
+        else:
+            st.success("✅ Voice đã sẵn sàng")
+            st.audio(st.session_state.data["generatedAudio"], format="audio/mp3")
+            c1, c2 = st.columns(2)
+            with c1:
+                with open(st.session_state.data["generatedAudio"], "rb") as f:
+                    st.download_button("⬇️ Tải file MP3", f, "voice.mp3", mime="audio/mpeg", use_container_width=True)
+            with c2:
+                if st.button("↺ Tạo lại voice", use_container_width=True):
+                    st.session_state.data["generatedAudio"] = None; st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
