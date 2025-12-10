@@ -74,16 +74,19 @@ PILLAR_DEFINITIONS = {
     - Mục tiêu: Thu hút người xem, viral.
     - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
+    - Lồng ghép được HuyK vào trong nội dung mẹo/tin tức.
     """,
     "A2: Kiến thức - Chuyên gia": """
     - Mục tiêu: Thể hiện sự hiểu biết, chuyên gia.
     - Nội dung: Lịch sử thương hiệu, thuật ngữ chuyên ngành, phân biệt chất liệu, dạy nghề.
     - Phong cách: Trầm ổn, sâu sắc, giải thích dễ hiểu, uy tín.
+    - Lồng ghép được HuyK vào trong nội dung kiến thức.
     """,
     "A3: Uy tín - Niềm tin": """
     - Mục tiêu: Xây dựng lòng tin.
     - Nội dung: Hoạt động cửa hàng, giải thưởng, giao hàng, kể chuyện bảo hành, tâm sự nghề.
     - Phong cách: Chân thành, kể chuyện (storytelling), tự hào.
+    - Lồng ghép được HuyK vào trong nội dung uy tín.
     """,
     "A4: Chuyển đổi - Kể chuyện khách hàng": """
     - Mục tiêu: Bán hàng khéo léo (Soft Sell), chạm vào cảm xúc người xem. TUYỆT ĐỐI KHÔNG kêu gọi mua hàng thô thiển, KHÔNG báo giá trực tiếp.
@@ -503,5 +506,6 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
