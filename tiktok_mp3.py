@@ -9,13 +9,7 @@ import json
 import whisper
 import pandas as pd
 
-# --- 1. CẤU HÌNH TRANG ---
-st.set_page_config(
-    page_title="HuyK AI Creator", 
-    page_icon="💎", 
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+https://i.ibb.co/5grLnPjW/logohk.png
 
 # --- 2. CẤU HÌNH LOGO & GIAO DIỆN ---
 # [THAY ĐỔI LOGO Ở ĐÂY] - Dán link ảnh logo của bạn vào giữa 2 dấu ngoặc kép
@@ -418,4 +412,5 @@ with col_main:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
