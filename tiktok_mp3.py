@@ -2,7 +2,7 @@ import streamlit as st
 import yt_dlp
 import os
 import google.generativeai as genai
-import requestse
+import requests
 import time
 import shutil
 import json
@@ -421,6 +421,7 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
