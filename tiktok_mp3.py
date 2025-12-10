@@ -10,7 +10,7 @@ import whisper
 import pandas as pd
 
 # --- 1. CẤU HÌNH TRANG & ICON ---
-TAB_ICON_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
+TAB_ICON_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
 st.set_page_config(
     page_title="HuyK AI Studio", 
     page_icon=TAB_ICON_URL,
@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # --- 2. CẤU HÌNH LOGO ---
-LOGO_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
+LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
 
 # ==========================================
 # 🔐 HỆ THỐNG ĐĂNG NHẬP (LOGIN SYSTEM)
@@ -503,3 +503,4 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
