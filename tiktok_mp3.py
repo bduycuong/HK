@@ -10,7 +10,7 @@ import whisper
 import pandas as pd
 
 # --- 1. CẤU HÌNH TRANG & ICON ---
-TAB_ICON_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
+TAB_ICON_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
 st.set_page_config(
     page_title="HuyK AI Studio", 
     page_icon=TAB_ICON_URL,
@@ -19,23 +19,28 @@ st.set_page_config(
 )
 
 # --- 2. CẤU HÌNH LOGO ---
-LOGO_URL = "https://i.ibb.co/5grLnPjW/logohk.png" 
+LOGO_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
 
 # ==========================================
-# 🔐 HỆ THỐNG ĐĂNG NHẬP (LOGIN SYSTEM)
+# 🔐 HỆ THỐNG ĐĂNG NHẬP
 # ==========================================
 def check_login():
-    # Nếu đã đăng nhập rồi thì return True
     if st.session_state.get('logged_in', False):
         return True
 
-    # Giao diện đăng nhập
+    # CSS riêng cho màn hình Login
     st.markdown(f"""
-        <div style="display:flex; justify-content:center; margin-top:50px; margin-bottom:20px;">
-            <img src="{LOGO_URL}" width="80" style="border-radius:10px;">
+        <style>
+            .login-container {{ text-align: center; margin-top: 50px; }}
+            .login-logo {{ width: 80px; border-radius: 10px; margin-bottom: 10px; }}
+            /* Fix lỗi Dark Mode cho màn login */
+            .stTextInput input {{ background-color: white !important; color: #333 !important; }}
+        </style>
+        <div class="login-container">
+            <img src="{LOGO_URL}" class="login-logo">
+            <h2 style="color:#333;">HuyK AI Studio</h2>
+            <p style="color:#666;">Vui lòng đăng nhập để sử dụng hệ thống</p>
         </div>
-        <h2 style="text-align:center; font-family:'Inter', sans-serif;">HuyK AI Studio</h2>
-        <p style="text-align:center; color:#64748b;">Vui lòng đăng nhập để sử dụng hệ thống</p>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -46,9 +51,7 @@ def check_login():
             submit = st.form_submit_button("Đăng nhập", use_container_width=True)
             
             if submit:
-                # Kiểm tra tài khoản trong Secrets
                 users_db = st.secrets.get("users", {})
-                
                 if username in users_db and users_db[username] == password:
                     st.session_state.logged_in = True
                     st.session_state.current_user = username
@@ -57,15 +60,13 @@ def check_login():
                     st.rerun()
                 else:
                     st.error("❌ Sai tài khoản hoặc mật khẩu")
-    
     return False
 
-# CHẶN CỬA: Nếu chưa đăng nhập thì DỪNG LẠI TẠI ĐÂY
 if not check_login():
     st.stop()
 
 # ==========================================
-# 🚀 PHẦN CODE CHÍNH (CHỈ CHẠY KHI ĐÃ LOGIN)
+# 🚀 PHẦN CODE CHÍNH
 # ==========================================
 
 # --- 3. ĐỊNH NGHĨA TUYẾN NỘI DUNG ---
@@ -74,19 +75,16 @@ PILLAR_DEFINITIONS = {
     - Mục tiêu: Thu hút người xem, viral.
     - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
-    - Lồng ghép được HuyK vào trong nội dung mẹo/tin tức.
     """,
     "A2: Kiến thức - Chuyên gia": """
     - Mục tiêu: Thể hiện sự hiểu biết, chuyên gia.
     - Nội dung: Lịch sử thương hiệu, thuật ngữ chuyên ngành, phân biệt chất liệu, dạy nghề.
     - Phong cách: Trầm ổn, sâu sắc, giải thích dễ hiểu, uy tín.
-    - Lồng ghép được HuyK vào trong nội dung kiến thức.
     """,
     "A3: Uy tín - Niềm tin": """
     - Mục tiêu: Xây dựng lòng tin.
     - Nội dung: Hoạt động cửa hàng, giải thưởng, giao hàng, kể chuyện bảo hành, tâm sự nghề.
     - Phong cách: Chân thành, kể chuyện (storytelling), tự hào.
-    - Lồng ghép được HuyK vào trong nội dung uy tín.
     """,
     "A4: Chuyển đổi - Kể chuyện khách hàng": """
     - Mục tiêu: Bán hàng khéo léo (Soft Sell), chạm vào cảm xúc người xem. TUYỆT ĐỐI KHÔNG kêu gọi mua hàng thô thiển, KHÔNG báo giá trực tiếp.
@@ -103,11 +101,9 @@ PILLAR_DEFINITIONS = {
 # --- 4. KHỞI TẠO SESSION STATE ---
 if 'processing_done' not in st.session_state: st.session_state.processing_done = False
 if 'product_df' not in st.session_state: st.session_state.product_df = None
-
-# Khởi tạo biến lưu Key (Mặc định là rỗng khi mới vào)
 if 'user_gemini_key' not in st.session_state: st.session_state.user_gemini_key = ""
 if 'user_minimax_key' not in st.session_state: st.session_state.user_minimax_key = ""
-if 'user_voice_id' not in st.session_state: st.session_state.user_voice_id = "speech-01-hd" # Default voice
+if 'user_voice_id' not in st.session_state: st.session_state.user_voice_id = "speech-01-hd"
 if 'user_memory' not in st.session_state: st.session_state.user_memory = ""
 
 if 'data' not in st.session_state: 
@@ -116,64 +112,116 @@ if 'data' not in st.session_state:
         "rewrittenScript": "", "generatedAudio": None
     }
 
-# --- 5. CSS GIAO DIỆN ---
+# --- 5. CSS GIAO DIỆN (ĐÃ TỐI ƯU MOBILE & DARK MODE) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    /* 1. FORCE LIGHT MODE & FONT */
     * {{ font-family: 'Inter', sans-serif; }}
-    .stApp {{ background-color: #f8fafc; color: #0f172a; }}
+    
+    /* Ép nền trắng/xám sáng cho toàn bộ app, bất chấp chế độ trình duyệt */
+    .stApp {{ 
+        background-color: #f8fafc !important; 
+        color: #0f172a !important; 
+    }}
+    
+    /* Fix chữ trong các input của Streamlit khi ở Dark Mode */
+    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {{
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #e2e8f0 !important;
+    }}
+    .stMarkdown, .stText, h1, h2, h3, p {{
+        color: #0f172a !important;
+    }}
+
     header, footer {{ display: none !important; }}
     .block-container {{ padding-top: 1rem !important; max-width: 1400px !important; }}
 
-    /* Navbar */
+    /* 2. NAVBAR RESPONSIVE */
     .nav-container {{
-        background: white; border-bottom: 1px solid #e2e8f0;
-        padding: 0.8rem 1.5rem; margin-bottom: 1.5rem;
-        border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        display: flex; justify-content: space-between; align-items: center;
+        background: white; 
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.8rem 1.5rem; 
+        margin-bottom: 1.5rem;
+        border-radius: 16px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        flex-wrap: wrap; /* Cho phép xuống dòng trên mobile */
+        gap: 10px;
     }}
+    .logo-section {{ display: flex; align-items: center; gap: 12px; }}
     .logo-img {{ width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }}
-    .brand-text {{ font-size: 18px; font-weight: 700; color: #0f172a; margin-left: 10px; }}
+    .brand-text {{ font-size: 18px; font-weight: 700; color: #0f172a; }}
     
-    /* Input & Button */
+    .status-group {{ display: flex; gap: 12px; align-items: center; }}
+    
+    /* 3. INPUT & BUTTON */
     div[data-testid="stTextInput"] input, div[data-testid="stSelectbox"] > div > div {{
-        border-radius: 12px; border: 1px solid #e2e8f0; height: 45px;
+        border-radius: 12px; height: 45px;
     }}
     .stButton > button {{
-        background-color: #2563eb; color: white; border-radius: 12px; height: 40px; font-weight: 600;
-        width: 100%; transition: all 0.2s; border: none;
+        background-color: #2563eb !important; 
+        color: white !important; 
+        border-radius: 12px; 
+        height: 50px; 
+        font-weight: 600;
+        width: 100%; 
+        transition: all 0.2s; 
+        border: none;
     }}
-    .stButton > button:hover {{ background-color: #1d4ed8; transform: translateY(-1px); }}
+    .stButton > button:hover {{ background-color: #1d4ed8 !important; transform: translateY(-1px); }}
 
-    /* Cards */
-    .card {{ background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.03); height: 100%; }}
-    .card-title {{ font-weight: 700; color: #334155; font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}}
+    /* 4. CARDS */
+    .card {{ 
+        background: white; 
+        border-radius: 20px; 
+        border: 1px solid #e2e8f0; 
+        padding: 20px; 
+        box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.03); 
+        height: 100%; 
+    }}
+    
+    /* 5. MOBILE OPTIMIZATION (Media Queries) */
+    @media (max-width: 640px) {{
+        .nav-container {{
+            padding: 0.8rem;
+            flex-direction: column; /* Xếp dọc trên mobile */
+            align-items: flex-start;
+        }}
+        .status-group {{
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 5px;
+        }}
+        .brand-text {{ font-size: 16px; }}
+        
+        /* Chỉnh lại padding của các container */
+        .block-container {{ padding-left: 1rem !important; padding-right: 1rem !important; }}
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. CẤU HÌNH & HÀM CÀI ĐẶT ---
+# --- 6. CẤU HÌNH & HÀM XỬ LÝ ---
 CONFIG_FILE = "app_config.txt"
 DEFAULT_PROMPT = """Nhiệm vụ: Viết lại nội dung video TikTok theo phong cách HuyK."""
 
 def load_config():
-    config = {
-        "minimax_voice": "", "minimax_model": "speech-2.6-hd", 
-        "prompt": DEFAULT_PROMPT, "memory": ""
-    }
+    config = {"minimax_voice": "", "minimax_model": "speech-2.6-hd", "prompt": DEFAULT_PROMPT, "memory": ""}
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                 for line in f:
                     if "=" in line:
                         k, v = line.strip().split("=", 1)
-                        # Chỉ load config chung, KHÔNG load key từ file (nếu có)
-                        if "key" not in k.lower(): 
-                            config[k] = v.replace("\\n", "\n").strip()
+                        if "key" not in k.lower(): config[k] = v.replace("\\n", "\n").strip()
         except: pass
     return config
 
 def save_config(mm_voice, mm_model, prompt, memory):
-    # Lưu config chung vào file server (Voice ID, Model, Prompt)
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         clean_prompt = prompt.replace("\n", "\\n")
         clean_memory = memory.replace("\n", "\\n")
@@ -183,64 +231,54 @@ config = load_config()
 
 @st.dialog("⚙️ Cài đặt Cá nhân")
 def open_settings():
-    st.caption("🔑 Nhập API Key của riêng bạn để sử dụng. Key sẽ không bị lưu lên server.")
-    
-    gemini_input = st.text_input("Gemini API Key", value=st.session_state.user_gemini_key, type="password", help="Trình duyệt sẽ tự gợi ý lưu mật khẩu này cho lần sau.")
+    st.caption("🔑 Nhập API Key của riêng bạn để sử dụng.")
+    gemini_input = st.text_input("Gemini API Key", value=st.session_state.user_gemini_key, type="password", help="Trình duyệt sẽ tự gợi ý lưu mật khẩu.")
     minimax_input = st.text_input("Minimax API Key", value=st.session_state.user_minimax_key, type="password")
-    
     c1, c2 = st.columns(2)
     with c1: 
         model_options = ["speech-2.6-hd", "speech-01-turbo", "speech-01-hd", "speech-02"]
         current = config.get("minimax_model", "speech-2.6-hd")
-        # Đồng bộ model nếu chưa có trong session
         idx = model_options.index(current) if current in model_options else 0
         model_input = st.selectbox("Model", model_options, index=idx)
-    with c2: 
-        voice_val = st.session_state.user_voice_id if st.session_state.user_voice_id else config.get("minimax_voice", "")
-        voice_input = st.text_input("Voice ID", value=voice_val)
-    
+    with c2: voice_input = st.text_input("Voice ID", value=st.session_state.user_voice_id)
     st.divider()
-    st.markdown("🧠 **Bộ nhớ Agent (Của riêng bạn)**")
-    memory_val = st.session_state.user_memory if st.session_state.user_memory else config.get("memory", "")
-    memory_input = st.text_area("Quy tắc ghi nhớ", value=memory_val, height=100)
-
-    # Prompt gốc (Admin mới sửa được) - Có thể ẩn nếu muốn
-    with st.expander("📝 Prompt Gốc (Cấu hình chung)"):
-        new_prompt = st.text_area("Base Prompt", value=config["prompt"], height=100)
-
-    if st.button("Lưu cấu hình (Phiên này)", type="primary"):
-        # Lưu vào Session State (Cá nhân)
+    st.markdown("🧠 **Bộ nhớ Agent**")
+    memory_input = st.text_area("Quy tắc ghi nhớ", value=st.session_state.user_memory, height=100)
+    if st.button("Lưu cấu hình", type="primary"):
         st.session_state.user_gemini_key = gemini_input
         st.session_state.user_minimax_key = minimax_input
         st.session_state.user_voice_id = voice_input
         st.session_state.user_memory = memory_input
-        
-        # Lưu Config chung (Prompt, Voice mặc định) vào file server
-        save_config(voice_input, model_input, new_prompt, memory_input)
-        
-        st.success("✅ Đã cập nhật! Hãy để trình duyệt lưu mật khẩu API Key để lần sau không phải nhập lại.")
-        time.sleep(1.5)
-        st.rerun()
+        save_config(voice_input, model_input, config["prompt"], memory_input)
+        st.success("✅ Đã cập nhật!"); time.sleep(1); st.rerun()
 
-def download_audio(url):
-    output_filename = "downloaded_audio.mp3"
-    if os.path.exists(output_filename): os.remove(output_filename)
+def download_media(url):
+    video_path = "downloaded_video.mp4"
+    audio_path = "downloaded_audio.mp3"
+    
+    if os.path.exists(video_path): os.remove(video_path)
+    if os.path.exists(audio_path): os.remove(audio_path)
+    
     if shutil.which("ffmpeg") is None:
         if os.path.exists(r"C:\ffmpeg\bin"): os.environ["PATH"] += os.pathsep + r"C:\ffmpeg\bin"
 
     ydl_opts = {
-        'format': 'bestaudio/best', 'outtmpl': 'downloaded_audio.%(ext)s',
-        'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec': 'mp3','preferredquality': '192'}],
+        'format': 'best',
+        'outtmpl': 'downloaded_video.%(ext)s',
+        'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}],
         'quiet': True, 'no_warnings': True, 'nocheckcertificate': True, 'ignoreerrors': True,
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'referer': 'https://www.tiktok.com/'
     }
+    
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             if not info: raise Exception("Không lấy được thông tin video.")
-            return output_filename, info.get('title', 'TikTok Audio')
-    except Exception as e: raise Exception(f"Lỗi tải video: {str(e)}")
+            title = info.get('title', 'Video Content')
+            os.system(f'ffmpeg -i "{video_path}" -vn -acodec libmp3lame -q:a 2 "{audio_path}" -y -loglevel quiet')
+            return video_path, audio_path, title
+    except Exception as e: raise Exception(f"Lỗi tải: {str(e)}")
 
 @st.cache_resource
 def load_whisper_model(): return whisper.load_model("base")
@@ -251,71 +289,56 @@ def transcribe_audio(file_path, model):
 
 def rewrite_with_gemini(original_text, pillar, product_info=""):
     api_key = st.session_state.user_gemini_key
-    if not api_key: return "⚠️ CHƯA NHẬP API KEY! Vui lòng bấm vào nút '⚙️ Cài đặt API Key' ở cột bên trái để nhập Key của bạn."
+    if not api_key: return "⚠️ CHƯA NHẬP KEY! Hãy vào Cài đặt để nhập."
     
-    pillar_instruction = PILLAR_DEFINITIONS.get(pillar, "")
-    memory_instruction = ""
-    if st.session_state.user_memory:
-        memory_instruction = f"\n--- 🧠 BỘ NHỚ QUY TẮC RIÊNG ---\n{st.session_state.user_memory}\n------------------------------\n"
-
-    system_instruction = f"""
+    pillar_instr = PILLAR_DEFINITIONS.get(pillar, "")
+    mem_instr = f"\n--- 🧠 BỘ NHỚ --- \n{st.session_state.user_memory}\n" if st.session_state.user_memory else ""
+    
+    prompt = f"""
     {config["prompt"]}
-    {memory_instruction}
-    --- YÊU CẦU CỤ THỂ CHO BÀI NÀY ---
-    1. TUYẾN NỘI DUNG: {pillar}
-    {pillar_instruction}
-    2. SẢN PHẨM CẦN LỒNG GHÉP (Nếu có):
-    {product_info if product_info else "Không có sản phẩm cụ thể, tập trung vào nội dung chính."}
-    3. QUY TẮC VIẾT:
-    - Không cần mở đầu bằng xin chào
-    - Nếu là tuyến A4: Tuyệt đối KHÔNG báo giá trực tiếp, KHÔNG kêu gọi "mua ngay". Hãy tập trung vào CÂU CHUYỆN KHÁCH HÀNG.
-    - Giọng văn: Chân thật, trầm, tâm sự (style HuyK).
-    - Xưng hô: "HuyK", gọi khách là "anh, chị, bạn, mọi người, anh khách, chị khách".
-    - Độ dài: Phù hợp kịch bản video ngắn (khoảng 40s - 90s).
+    {mem_instr}
+    --- YÊU CẦU ---
+    1. TUYẾN: {pillar}
+    {pillar_instr}
+    2. SẢN PHẨM:
+    {product_info}
+    3. QUY TẮC:
+    - Nếu là A4: KHÔNG báo giá trực tiếp, tập trung kể chuyện.
+    - Giọng văn: Chân thật, trầm, tâm sự.
+    - Xưng hô: "HuyK", gọi khách là "anh chị".
     """
-
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_instruction) 
-        response = model.generate_content(f"Đây là nội dung gốc/ý tưởng thô:\n'{original_text}'\n\nHãy viết lại kịch bản chi tiết.")
-        return response.text
+        model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt) 
+        return model.generate_content(f"Nội dung gốc:\n'{original_text}'\n\nViết lại kịch bản chi tiết.").text
     except Exception as e: return f"Lỗi Gemini: {e}"
 
 def generate_minimax_audio(text):
     api_key = st.session_state.user_minimax_key
-    if not api_key: return None, "Thiếu Minimax API Key"
+    if not api_key: return None, "Thiếu Key Minimax"
     if api_key.lower().startswith("bearer "): api_key = api_key[7:].strip()
-    
-    voice_id = st.session_state.user_voice_id.strip()
-    if not voice_id: voice_id = config.get("minimax_voice", "speech-01-hd") 
-
-    model_id = config.get("minimax_model", "speech-2.6-hd")
     
     url = "https://api.minimax.io/v1/t2a_v2"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     data = {
-        "model": model_id, "text": text, "stream": False,
-        "voice_setting": {"voice_id": voice_id, "speed": 1.0, "vol": 1.0, "pitch": 0},
+        "model": config.get("minimax_model", "speech-2.6-hd"), "text": text, "stream": False,
+        "voice_setting": {"voice_id": st.session_state.user_voice_id or "speech-01-hd", "speed": 1.0, "vol": 1.0, "pitch": 0},
         "audio_setting": {"sample_rate": 32000, "format": "mp3", "channel": 1}
     }
     try:
-        response = requests.post(url, headers=headers, json=data)
-        if response.status_code == 200:
-            resp_json = response.json()
-            if "base_resp" in resp_json and resp_json["base_resp"]["status_code"] != 0:
-                return None, f"Lỗi: {resp_json['base_resp']['status_msg']}"
-            if "data" in resp_json and "audio" in resp_json["data"]:
-                hex_data = resp_json["data"]["audio"]
-                output_path = f"huyk_voice_{int(time.time())}.mp3"
-                with open(output_path, "wb") as f: f.write(bytes.fromhex(hex_data))
-                return output_path, None
-            return None, "Không có dữ liệu audio."
-        return None, f"Lỗi HTTP {response.status_code}"
-    except Exception as e: return None, f"Lỗi: {str(e)}"
+        res = requests.post(url, headers=headers, json=data)
+        if res.status_code == 200:
+            js = res.json()
+            if js.get("base_resp", {}).get("status_code") != 0: return None, js["base_resp"]["status_msg"]
+            if "data" in js and "audio" in js["data"]:
+                path = f"huyk_voice_{int(time.time())}.mp3"
+                with open(path, "wb") as f: f.write(bytes.fromhex(js["data"]["audio"]))
+                return path, None
+            return None, "Không có audio"
+        return None, f"HTTP {res.status_code}"
+    except Exception as e: return None, str(e)
 
 # --- 7. UI CHÍNH ---
-
-# Hiển thị nút Đăng xuất ở Sidebar
 with st.sidebar:
     if 'logged_in' in st.session_state and st.session_state.logged_in:
         st.write(f"👤 Hi, **{st.session_state.current_user}**")
@@ -325,187 +348,29 @@ with st.sidebar:
 
 st.markdown(f"""
 <div class="nav-container">
-    <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo-section">
         <img src="{LOGO_URL}" class="logo-img">
         <span class="brand-text">HuyK AI Studio</span>
     </div>
-    <div style="display:flex; gap:12px; align-items:center;">
-        <div class="status-badge" style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:12px; border:1px solid #e2e8f0; color:{'#166534' if st.session_state.user_gemini_key else '#64748b'}; display:flex; align-items:center; gap:5px;">
-            <div style="width:6px; height:6px; border-radius:50%; background:{'#22c55e' if st.session_state.user_gemini_key else '#cbd5e1'}"></div> Gemini
-        </div>
-        <div class="status-badge" style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:12px; border:1px solid #e2e8f0; color:{'#166534' if st.session_state.user_minimax_key else '#64748b'}; display:flex; align-items:center; gap:5px;">
-            <div style="width:6px; height:6px; border-radius:50%; background:{'#22c55e' if st.session_state.user_minimax_key else '#cbd5e1'}"></div> Minimax
-        </div>
+    <div class="status-group">
+        <div class="status-badge" style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:12px; border:1px solid #e2e8f0; color:{'#166534' if st.session_state.user_gemini_key else '#64748b'};"><div style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{'#22c55e' if st.session_state.user_gemini_key else '#cbd5e1'};margin-right:5px;"></div>Gemini</div>
+        <div class="status-badge" style="background:#f1f5f9; padding:4px 10px; border-radius:20px; font-size:12px; border:1px solid #e2e8f0; color:{'#166534' if st.session_state.user_minimax_key else '#64748b'};"><div style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{'#22c55e' if st.session_state.user_minimax_key else '#cbd5e1'};margin-right:5px;"></div>Minimax</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-col_strategy, col_main = st.columns([3, 7], gap="large")
+col_l, col_r = st.columns([3, 7], gap="large")
 
-with col_strategy:
+with col_l:
     st.subheader("🛠️ Chiến lược Content")
-    st.markdown("**1. Tuyến nội dung**")
-    selected_pillar = st.selectbox(
-        "Hướng triển khai:",
-        list(PILLAR_DEFINITIONS.keys()),
-        index=0,
-        label_visibility="collapsed"
-    )
-    with st.expander("ℹ️ Chi tiết tuyến này", expanded=True):
-        st.info(PILLAR_DEFINITIONS[selected_pillar])
-        
+    pillar = st.selectbox("Hướng triển khai:", list(PILLAR_DEFINITIONS.keys()))
+    with st.expander("ℹ️ Chi tiết"): st.info(PILLAR_DEFINITIONS[pillar])
     st.divider()
-    
     st.markdown("**2. Kho Sản phẩm**")
-    uploaded_products = st.file_uploader("Upload danh sách (Excel/CSV)", type=['xlsx', 'csv'], label_visibility="collapsed")
-    
-    product_options = []
-    if uploaded_products:
+    up_prod = st.file_uploader("Upload danh sách (Excel/CSV)", type=['xlsx', 'csv'], label_visibility="collapsed")
+    prod_opts = []
+    if up_prod:
         try:
-            if uploaded_products.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_products)
-            else:
-                df = pd.read_excel(uploaded_products)
+            df = pd.read_csv(up_prod) if up_prod.name.endswith('.csv') else pd.read_excel(up_prod)
             df.columns = [c.strip().lower() for c in df.columns]
-            col_code = next((c for c in df.columns if 'mã' in c or 'code' in c), df.columns[0])
-            col_name = next((c for c in df.columns if 'tên' in c or 'name' in c), df.columns[1])
-            col_desc = next((c for c in df.columns if 'mô tả' in c or 'desc' in c), df.columns[-1])
-            st.session_state.product_df = df[[col_code, col_name, col_desc]].copy()
-            st.success(f"✅ Đã tải {len(df)} sản phẩm")
-            st.session_state.product_df['display'] = st.session_state.product_df[col_code].astype(str) + " - " + st.session_state.product_df[col_name].astype(str)
-            product_options = st.session_state.product_df['display'].tolist()
-        except Exception as e:
-            st.error(f"Lỗi đọc file: {e}")
-
-    selected_products_display = st.multiselect("Chọn sản phẩm lồng ghép:", product_options)
-    
-    selected_product_info_str = ""
-    if selected_products_display and st.session_state.product_df is not None:
-        selected_rows = st.session_state.product_df[st.session_state.product_df['display'].isin(selected_products_display)]
-        info_list = []
-        for index, row in selected_rows.iterrows():
-            cols = selected_rows.columns
-            info = f"- MÃ: {row[cols[0]]}\n  TÊN: {row[cols[1]]}\n  MÔ TẢ CHI TIẾT: {row[cols[2]]}"
-            info_list.append(info)
-        selected_product_info_str = "\n".join(info_list)
-        
-    st.divider()
-    if st.button("⚙️ Cài đặt API Key", use_container_width=True):
-        open_settings()
-
-
-with col_main:
-    if not st.session_state.processing_done:
-        st.markdown("""
-        <h1 style="font-size:2.5rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem; line-height:1.2;">
-            Biến Video thành <span style="color:#2563eb;">Viral Content</span>
-        </h1>
-        <p style="color:#64748b; font-size:1rem; margin-bottom:2rem;">
-            Công cụ hỗ trợ viết lại kịch bản, lồng ghép sản phẩm và tạo giọng đọc AI.
-        </p>
-        """, unsafe_allow_html=True)
-        
-        if "A4" in selected_pillar or "A5" in selected_pillar:
-            if not selected_product_info_str:
-                st.warning("⚠️ Tuyến này cần bán hàng. Hãy chọn sản phẩm ở cột bên trái.")
-
-        tab1, tab2, tab3 = st.tabs(["📄 Ý tưởng / Văn bản", "☁️ File Upload", "🔗 Link Video"])
-        
-        with tab1:
-            raw_input = st.text_area("Nhập ý tưởng thô...", height=150, placeholder="Ví dụ: Khách hỏi 500k mua được nhẫn bạc nào tặng người yêu...", label_visibility="collapsed")
-            st.write("")
-            if st.button("✨ Phân tích & Viết bài", type="primary"):
-                if raw_input:
-                    with st.status("🚀 Đang xử lý...", expanded=True):
-                        rewrite = rewrite_with_gemini(raw_input, selected_pillar, selected_product_info_str)
-                        st.session_state.data.update({"videoTitle": "Văn bản nhập tay", "originalTranscript": raw_input, "rewrittenScript": rewrite, "generatedAudio": None})
-                        st.session_state.processing_done = True
-                        st.rerun()
-                else: st.toast("Nhập nội dung đi bạn ơi!", icon="⚠️")
-
-        with tab2:
-            uploaded_file = st.file_uploader("Upload Video/Audio", type=['mp4', 'mp3', 'wav'], label_visibility="collapsed")
-            st.write("")
-            if st.button("🚀 Xử lý File", type="primary", key="btn_file"):
-                if uploaded_file:
-                    with st.status("🚀 Đang xử lý...", expanded=True):
-                        try:
-                            with open("temp.mp3", "wb") as f: f.write(uploaded_file.getbuffer())
-                            st.write("🎧 Đang tách giọng (Whisper)...")
-                            raw = transcribe_audio("temp.mp3", load_whisper_model())
-                            st.write(f"💎 Đang viết theo tuyến: {selected_pillar}...")
-                            rewrite = rewrite_with_gemini(raw, selected_pillar, selected_product_info_str)
-                            # COPY FILE ĐỂ DÙNG Ở TRANG KẾT QUẢ
-                            shutil.copy("temp.mp3", "downloaded_audio.mp3") 
-                            st.session_state.data.update({"videoTitle": uploaded_file.name, "originalTranscript": raw, "rewrittenScript": rewrite, "generatedAudio": None})
-                            st.session_state.processing_done = True
-                            st.rerun()
-                        except Exception as e: st.error(str(e))
-
-        with tab3:
-            c_in, c_btn = st.columns([5, 1], vertical_alignment="bottom")
-            url = c_in.text_input("Link Video", placeholder="TikTok / YouTube Shorts...", label_visibility="collapsed")
-            if c_btn.button("Phân tích", type="primary", key="btn_link"):
-                if url:
-                    with st.status("🚀 Đang xử lý...", expanded=True):
-                        try:
-                            st.write("📥 Tải video...")
-                            path, title = download_audio(url)
-                            st.write("🎧 Tách giọng...")
-                            raw = transcribe_audio(path, load_whisper_model())
-                            st.write(f"💎 Đang viết theo tuyến: {selected_pillar}...")
-                            rewrite = rewrite_with_gemini(raw, selected_pillar, selected_product_info_str)
-                            st.session_state.data.update({"videoTitle": title, "originalTranscript": raw, "rewrittenScript": rewrite, "generatedAudio": None})
-                            st.session_state.processing_done = True
-                            st.rerun()
-                        except Exception as e: st.error(str(e))
-            st.caption("Paste link video các nền tảng Tiktok/Facebook/Instagram/Youtube Short/ Xhs / Douyin vào để AI trích xuất nội dung và sáng tạo lại theo concept đã chọn....")
-
-    else:
-        c_back, c_title = st.columns([1.5, 8], vertical_alignment="center")
-        if c_back.button("← Quay lại"): 
-            st.session_state.processing_done = False
-            st.rerun()
-        c_title.markdown(f"### 🎯 Kết quả xử lý")
-        st.divider()
-        
-        # --- HIỂN THỊ FILE GỐC ---
-        if os.path.exists("downloaded_audio.mp3"):
-            st.markdown("**🔊 Audio/Video Gốc:**")
-            st.audio("downloaded_audio.mp3", format="audio/mp3")
-        # -------------------------
-        
-        with st.expander("📄 Xem nội dung gốc (Transcript)", expanded=False):
-            st.text_area("Original", value=st.session_state.data["originalTranscript"], height=200)
-        
-        st.markdown(f"**✨ Kịch bản HuyK ({selected_pillar})**")
-        new_script = st.text_area("Editor", value=st.session_state.data["rewrittenScript"], height=400, label_visibility="collapsed")
-        if new_script != st.session_state.data["rewrittenScript"]: st.session_state.data["rewrittenScript"] = new_script
-        
-        # --- HIỂN THỊ SỐ KÝ TỰ ---
-        char_count = len(st.session_state.data["rewrittenScript"])
-        st.caption(f"📝 Số ký tự: {char_count} | ⏳ Ước tính audio: ~{int(char_count/15)} giây")
-        # -------------------------
-
-        st.markdown('<div class="card" style="margin-top:20px; background:#f8fafc">', unsafe_allow_html=True)
-        if not st.session_state.data["generatedAudio"]:
-            if st.button("🎙️ Tạo giọng đọc AI", type="primary", use_container_width=True):
-                with st.spinner("Đang khởi tạo voice..."):
-                    path, err = generate_minimax_audio(st.session_state.data["rewrittenScript"])
-                    if path: st.session_state.data["generatedAudio"] = path; st.rerun()
-                    else: st.error(err)
-        else:
-            st.success("✅ Voice đã sẵn sàng")
-            st.audio(st.session_state.data["generatedAudio"], format="audio/mp3")
-            c_dl, c_re = st.columns(2)
-            with c_dl:
-                with open(st.session_state.data["generatedAudio"], "rb") as f:
-                    st.download_button("⬇️ Tải file MP3", f, file_name="voice.mp3", mime="audio/mpeg", use_container_width=True)
-            with c_re:
-                if st.button("↺ Tạo lại voice", use_container_width=True):
-                    st.session_state.data["generatedAudio"] = None
-                    st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-
-
+            c_code = next((c for c in df.columns if '
