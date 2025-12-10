@@ -28,12 +28,14 @@ PILLAR_DEFINITIONS = {
     - Nội dung: Chia sẻ mẹo vặt, câu hỏi thú vị, soi đồ người nổi tiếng, tin tức ngành.
     - Phong cách: Nhanh, gọn, gây tò mò, ngôn ngữ đời thường.
     - Lồng ghép được HuyK vào trong nội dung mẹo/tin tức.
+    - Không thay đổi quá nhiều kiến thức nội dung video nếu là ngành Trang sức
     """,
     "A2: Kiến thức - Chuyên gia": """
     - Mục tiêu: Thể hiện sự hiểu biết, chuyên gia.
     - Nội dung: Lịch sử thương hiệu, thuật ngữ chuyên ngành, phân biệt chất liệu, dạy nghề.
     - Phong cách: Trầm ổn, sâu sắc, giải thích dễ hiểu, uy tín.
     - Lồng ghép được HuyK vào trong nội dung kiến thức.
+    - Không thay đổi quá nhiều kiến thức nội dung video nếu là ngành Trang sức
     """,
     "A3: Uy tín - Niềm tin": """
     - Mục tiêu: Xây dựng lòng tin.
@@ -423,3 +425,4 @@ with col_main:
                     st.session_state.data["generatedAudio"] = None
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
