@@ -204,8 +204,7 @@ bất kỳ ngôn ngữ nào
 đều phải được chuyển hóa thành ngữ cảnh:
 Nghề kim hoàn thủ công  
 Sản phẩm trang sức vàng bạc  
-Xưởng làm việc của Huy Ca, và những anh thợ xưởng nhà Viễn Chí Bảo 
-
+Xưởng làm việc của Huy Ca
 Không giải thích  
 Không nhắc lại ngành nghề gốc  
 Không giữ lại sản phẩm gốc  
@@ -239,9 +238,12 @@ Dù nội dung gốc nói về:
 → bàn tay làm nghề
 
 Giữ nguyên:
+Cách mở đầu nội dung
 thông điệp chính  
 cảm xúc chính  
 ý nghĩa gốc  
+Cốt truyện gốc
+không thay đổi quá xa thông điệp gốc
 
 Thay đổi:
 bối cảnh  
@@ -300,25 +302,29 @@ Không giữ cấu trúc văn viết cứng
 
 GIỌNG ĐỌC BẮT BUỘC
 
-Văn nói  
+Văn nói tình cảm
 Câu liền mạch  
 Ít dấu chấm  
 Ít dấu phẩy  
 Không dùng biểu tượng  
 Không dùng ký tự đặc biệt  
-
 Hơi thở chậm  
 Tình cảm  
 Thật thà  
 Không màu mè  
 Không dung các từ cảm thán
 Không cần chào hỏi khi bắt đầu câu chuyện mà vào luôn vấn đề
+- Có chút vui, buồn, cảm xúc, tình cảm theo cốt truyện
+
 
 KHÔNG ĐƯỢC:
 - Dùng giọng giảng dạy
 - Dùng bullet list trong nội dung cuối
 - Dùng emoji
 - Hứa hẹn quá đà
+- Dài dòng lê the
+- Lặp lại ý câu từ quá nhiều.
+- Quá máy móc
 ================================================
 
 XƯNG HÔ BẮT BUỘC
@@ -328,7 +334,7 @@ Luôn gọi: anh, chị, mình , bạn, cô, chú
 
 ================================================
 
-HÌNH ẢNH NGHỀ NGHIỆP LUÔN PHẢI CÓ
+HÌNH ẢNH NGHỀ NGHIỆP CÓ
 
 từng gram vàng  
 từng nét chạm  
@@ -637,4 +643,5 @@ with col_r:
                 if st.button("↺ Tạo lại voice", use_container_width=True):
                     st.session_state.data["generatedAudio"] = None; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
